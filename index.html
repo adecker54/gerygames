@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web3 Tárca Menedzser Teszt</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background-color: #f0f0f0; }
+        .container { background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); text-align: center; }
+        #connectWalletButton {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        #connectWalletButton:hover {
+            background-color: #0056b3;
+        }
+        #statusMessage {
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #333;
+        }
+        .language-switcher {
+            margin-top: 20px;
+        }
+        .language-switcher button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f8f8f8;
+        }
+        .language-switcher button.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Web3 Tárca Integráció</h1>
+        <button id="connectWalletButton"></button>
+        <p id="statusMessage"></p>
+
+        <div class="language-switcher">
+            <button id="langHu" data-lang="hu">Magyar</button>
+            <button id="langEn" data-lang="en">English</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js" type="application/javascript"></script>
+    
+    <script src="web3WalletManager.js"></script>
+
+    <script>
+        let isWalletConnected = false; // A játék státuszát jelző változó
+
+        // Példa a languageChangeCallback-re a játékban
+        function handleLanguageChange(newLang) {
+            console.log("Játék nyelve megváltozott:", newLang);
+            // Itt frissítheted a játék UI elemeit a megadott nyelvre
+        }
+
+        // A Web3 tárca menedzser inicializálása
+        // A "0" itt egy placeholder a későbbi egyenleg ellenőrzéshez
+        const walletManager = new Web3WalletManager(['hu', 'en'], 'hu', '0', handleLanguageChange);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            walletManager.init(); // Inicializálja a tárca menedzsert
+            
+            // Figyeld a tárca csatlakozási státuszának változásait
+            walletManager.onConnectionStatusChange((status) => {
+                isWalletConnected = status;
+                document.getElementById('statusMessage').innerText = status ? 
+                    walletManager.getTranslation('wallet_connected_message') : 
+                    walletManager.getTranslation('wallet_disconnected_message');
+                console.log("Tárca státusz frissítve:", isWalletConnected);
+                // Itt aktiválhatod/deaktiválhatod a játék funkcióit a isWalletConnected alapján
+            });
+
+            // Nyelvváltó gombok kezelése
+            document.getElementById('langHu').addEventListener('click', () => {
+                walletManager.setLanguage('hu');
+                document.getElementById('langHu').classList.add('active');
+                document.getElementById('langEn').classList.remove('active');
+            });
+            document.getElementById('langEn').addEventListener('click', () => {
+                walletManager.setLanguage('en');
+                document.getElementById('langEn').classList.add('active');
+                document.getElementById('langHu').classList.remove('active');
+            });
+
+            // Kezdeti nyelv aktívvá tétele
+            document.getElementById(`lang${walletManager.currentLanguage.charAt(0).toUpperCase() + walletManager.currentLanguage.slice(1)}`).classList.add('active');
+        });
+    </script>
+</body>
+</html>
