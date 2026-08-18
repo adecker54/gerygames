@@ -1,105 +1,137 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web3 Tárca Menedzser Teszt</title>
-    <style>
-        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background-color: #f0f0f0; }
-        .container { background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); text-align: center; }
-        #connectWalletButton {
-            padding: 15px 30px;
-            font-size: 1.2em;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            transition: background-color 0.3s ease;
-        }
-        #connectWalletButton:hover {
-            background-color: #0056b3;
-        }
-        #statusMessage {
-            margin-top: 20px;
-            font-size: 1.1em;
-            color: #333;
-        }
-        .language-switcher {
-            margin-top: 20px;
-        }
-        .language-switcher button {
-            padding: 8px 15px;
-            margin: 0 5px;
-            cursor: pointer;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #f8f8f8;
-        }
-        .language-switcher button.active {
-            background-color: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#8B6B4F" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <title>Gery hegyimacska játékai</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" href="favicon.ico" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>Web3 Tárca Integráció</h1>
-        <button id="connectWalletButton"></button>
-        <p id="statusMessage"></p>
-
-        <div class="language-switcher">
-            <button id="langHu" data-lang="hu">Magyar</button>
-            <button id="langEn" data-lang="en">English</button>
-        </div>
+    <!-- ============================================================ -->
+    <!-- FŐ ALKALMAZÁS TÁROLÓ                                         -->
+    <!-- ============================================================ -->
+    <div id="app">
+        <!-- A képernyőket a JavaScript fogja dinamikusan betölteni -->
     </div>
 
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js" type="application/javascript"></script>
-    
-    <script src="web3WalletManager.js"></script>
+    <!-- ============================================================ -->
+    <!-- HANGOK (rejtett audio elemek)                                 -->
+    <!-- ============================================================ -->
+    <div id="sound-container" style="display:none;">
+        <audio id="sound-click" src="assets/sounds/click.mp3" preload="auto"></audio>
+        <audio id="sound-win" src="assets/sounds/win.mp3" preload="auto"></audio>
+        <audio id="sound-error" src="assets/sounds/error.mp3" preload="auto"></audio>
+    </div>
 
-    <script>
-        let isWalletConnected = false; // A játék státuszát jelző változó
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT MODULOK                                           -->
+    <!-- ============================================================ -->
+    <script type="module">
+        // ---- Modulok betöltése ----
+        import { App } from './js/app.js';
+        import { LanguageManager } from './js/language.js';
+        import { AuthManager } from './js/auth.js';
+        import { PointsManager } from './js/points.js';
+        import { SoundManager } from './js/sound.js';
+        import { GamesManager } from './js/games.js';
+        import { Game1 } from './js/game1.js';
+        import { Game2 } from './js/game2.js';
+        import { Game3 } from './js/game3.js';
+        import { Game4 } from './js/game4.js';
+        import { AdminManager } from './js/admin.js';
 
-        // Példa a languageChangeCallback-re a játékban
-        function handleLanguageChange(newLang) {
-            console.log("Játék nyelve megváltozott:", newLang);
-            // Itt frissítheted a játék UI elemeit a megadott nyelvre
+        // ---- Globális állapot ----
+        window.GeryApp = {
+            state: {
+                currentScreen: 'intro',     // 'intro' | 'menu' | 'game' | 'goodbye'
+                currentGame: null,          // 1-4
+                language: 'hu',             // 'hu' | 'en' | 'de' | 'ru'
+                soundEnabled: true,
+                userCode: null,             // 6 karakteres kód
+                totalPoints: 0,             // Összesített pontszám (menetben)
+                sessionPoints: 0,           // Adott menetben elért pontok
+                isCodeValid: false,
+                isLoggedIn: false,
+                walletAddress: null,
+                gameScores: [0, 0, 0, 0],   // Az egyes játékokban elért pontok
+                gameMultipliers: [0, 0, 0, 0], // Az egyes játékok szorzói
+                games: [
+                    { id: 1, name: 'Játék 1', image: 'game1.jpg', multiplier: 1, active: false },
+                    { id: 2, name: 'Játék 2', image: 'game2.jpg', multiplier: 1, active: false },
+                    { id: 3, name: 'Játék 3', image: 'game3.jpg', multiplier: 1, active: false },
+                    { id: 4, name: 'Játék 4', image: 'game4.jpg', multiplier: 1, active: false }
+                ],
+                previousPoints: 0,          // Előzőleg mentett pontszám (a CSV-ből)
+                startTime: null,
+                endTime: null,
+                codeList: [],               // Az összes érvényes kód
+                pointsData: [],             // A points.csv tartalma
+                isAdmin: false              // Admin mód aktív?
+            },
+            // A modulok példányai
+            modules: {}
+        };
+
+        // ---- Modulok inicializálása ----
+        try {
+            // Nyelvi rendszer
+            window.GeryApp.modules.language = new LanguageManager();
+            await window.GeryApp.modules.language.init();
+
+            // Pontszám kezelő
+            window.GeryApp.modules.points = new PointsManager();
+            await window.GeryApp.modules.points.init();
+
+            // Hang kezelő
+            window.GeryApp.modules.sound = new SoundManager();
+            window.GeryApp.modules.sound.init();
+
+            // Web3 azonosítás
+            window.GeryApp.modules.auth = new AuthManager();
+            await window.GeryApp.modules.auth.init();
+
+            // Játékok menüje
+            window.GeryApp.modules.games = new GamesManager();
+            await window.GeryApp.modules.games.init();
+
+            // Játékok
+            window.GeryApp.modules.game1 = new Game1();
+            window.GeryApp.modules.game2 = new Game2();
+            window.GeryApp.modules.game3 = new Game3();
+            window.GeryApp.modules.game4 = new Game4();
+
+            // Admin
+            window.GeryApp.modules.admin = new AdminManager();
+            await window.GeryApp.modules.admin.init();
+
+            // ---- Fő alkalmazás indítása ----
+            window.GeryApp.modules.app = new App();
+            await window.GeryApp.modules.app.init();
+
+            console.log('🐱 Gery hegyimacska játékai – Sikeres betöltés!');
+        } catch (error) {
+            console.error('❌ Hiba a betöltés során:', error);
+            document.getElementById('app').innerHTML = `
+                <div style="padding:40px;text-align:center;color:#8B6B4F;">
+                    <h2>❌ Hiba történt a betöltés során</h2>
+                    <p>Kérlek, ellenőrizd a konzolt (F12), vagy töltsd újra az oldalt!</p>
+                    <p style="font-size:12px;color:#999;">${error.message}</p>
+                </div>
+            `;
         }
-
-        // A Web3 tárca menedzser inicializálása
-        // A "0" itt egy placeholder a későbbi egyenleg ellenőrzéshez
-        const walletManager = new Web3WalletManager(['hu', 'en'], 'hu', '0', handleLanguageChange);
-
-        document.addEventListener('DOMContentLoaded', () => {
-            walletManager.init(); // Inicializálja a tárca menedzsert
-            
-            // Figyeld a tárca csatlakozási státuszának változásait
-            walletManager.onConnectionStatusChange((status) => {
-                isWalletConnected = status;
-                document.getElementById('statusMessage').innerText = status ? 
-                    walletManager.getTranslation('wallet_connected_message') : 
-                    walletManager.getTranslation('wallet_disconnected_message');
-                console.log("Tárca státusz frissítve:", isWalletConnected);
-                // Itt aktiválhatod/deaktiválhatod a játék funkcióit a isWalletConnected alapján
-            });
-
-            // Nyelvváltó gombok kezelése
-            document.getElementById('langHu').addEventListener('click', () => {
-                walletManager.setLanguage('hu');
-                document.getElementById('langHu').classList.add('active');
-                document.getElementById('langEn').classList.remove('active');
-            });
-            document.getElementById('langEn').addEventListener('click', () => {
-                walletManager.setLanguage('en');
-                document.getElementById('langEn').classList.add('active');
-                document.getElementById('langHu').classList.remove('active');
-            });
-
-            // Kezdeti nyelv aktívvá tétele
-            document.getElementById(`lang${walletManager.currentLanguage.charAt(0).toUpperCase() + walletManager.currentLanguage.slice(1)}`).classList.add('active');
-        });
     </script>
 </body>
 </html>
