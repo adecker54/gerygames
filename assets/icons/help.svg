@@ -1,0 +1,6 @@
+<svg width="96" height="96" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Help gomb</title>
+  <desc>Szögletes kék gomb nagy fehér kérdőjellel</desc>
+  <rect x="2" y="2" width="92" height="92" rx="12" fill="#2563EB"/>
+  <text x="48" y="68" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700" fill="#FFFFFF">?</text>
+</svg>
