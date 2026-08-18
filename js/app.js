@@ -295,47 +295,61 @@ export class App {
         }
     }
 
-    updateScreenTexts() {
-        // A data-i18n attribútumokat a LanguageManager kezeli
+updateScreenTexts() {
+    // Nyelvi szövegek frissítése a DOM-ban
+    if (this.modules.language) {
         this.modules.language.applyToDOM();
+    }
     
-        // Fix gombok frissítése - ELLENŐRIZZÜK, HOGY LÉTEZNEK-E
-        const lang = this.modules.language.getLanguage();
-        const langNames = { hu: 'Magyar', en: 'English', de: 'Deutsch', ru: 'Русский' };
+    const lang = this.modules.language?.getLanguage() || 'hu';
+    const langNames = { hu: 'Magyar', en: 'English', de: 'Deutsch', ru: 'Русский' };
+    const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', ru: '🇷🇺' };
     
-        const langBtn = document.querySelector('#btn-lang');
-        if (langBtn) {
-            const label = langBtn.querySelector('.label');
-            if (label) {
-                label.textContent = langNames[lang] || lang;
-            }
-            const icon = langBtn.querySelector('.icon');
-            if (icon) {
-                const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', ru: '🇷🇺' };
-                icon.textContent = flags[lang] || '🌐';
-            }
+    // ---- NYELV GOMB ----
+    const langBtn = document.getElementById('btn-lang');
+    if (langBtn) {
+        const label = langBtn.querySelector('.label');
+        if (label) {
+            label.textContent = langNames[lang] || lang;
         }
-    
-        const soundBtn = document.getElementById('btn-sound');
-        if (soundBtn) {
-            const label = soundBtn.querySelector('.label');
-            if (label) {
-                label.textContent = this.state.soundEnabled ? 
-                    this.modules.language.t('sound_on') : 
-                    this.modules.language.t('sound_off');
-            }
-        }
-    
-        // Pont gomb frissítése
-        const pointsBtn = document.getElementById('btn-points');
-        if (pointsBtn) {
-            const label = pointsBtn.querySelector('.label');
-            if (label) {
-                const total = this.modules.points?.getCurrentTotal() || 0;
-                label.textContent = total.toString();
-            }
+        const icon = langBtn.querySelector('.icon');
+        if (icon) {
+            icon.textContent = flags[lang] || '🌐';
         }
     }
+    
+    // ---- HANG GOMB ----
+    const soundBtn = document.getElementById('btn-sound');
+    if (soundBtn) {
+        const label = soundBtn.querySelector('.label');
+        if (label) {
+            label.textContent = this.state.soundEnabled ? 
+                (this.modules.language?.t('sound_on') || 'Hang be') : 
+                (this.modules.language?.t('sound_off') || 'Hang ki');
+        }
+        const icon = soundBtn.querySelector('.icon');
+        if (icon) {
+            icon.textContent = this.state.soundEnabled ? '🔊' : '🔇';
+        }
+    }
+    
+    // ---- PONT GOMB ----
+    const pointsBtn = document.getElementById('btn-points');
+    if (pointsBtn) {
+        const label = pointsBtn.querySelector('.label');
+        if (label) {
+            const total = this.modules.points?.getCurrentTotal() || 0;
+            label.textContent = total.toString();
+        }
+        const icon = pointsBtn.querySelector('.icon');
+        if (icon) {
+            icon.textContent = '🏆';
+        }
+    }
+    
+    // ---- HELP ÉS KILÉPÉS GOMBOK (csak ikon, nincs szöveg) ----
+    // Ezeket nem kell frissíteni
+}
 
     // ---------- KÓDSZÁM ELLENŐRZÉS ----------
     validateCode(code, input, errorMsg, continueBtn, supportBtn) {
