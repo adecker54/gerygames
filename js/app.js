@@ -281,7 +281,8 @@ export class App {
 
     updateLanguageButton() {
         const btn = document.getElementById('btn-lang');
-        if (!btn) return;
+        if (!btn) return;  // ← EZT ADD HOZZÁ AZ ELEJÉRE!
+    
         const current = this.modules.language.getLanguage();
         const label = btn.querySelector('.label');
         if (label) {
@@ -297,12 +298,24 @@ export class App {
     updateScreenTexts() {
         // A data-i18n attribútumokat a LanguageManager kezeli
         this.modules.language.applyToDOM();
-        
-        // Fix gombok frissítése
+    
+        // Fix gombok frissítése - ELLENŐRIZZÜK, HOGY LÉTEZNEK-E
         const lang = this.modules.language.getLanguage();
         const langNames = { hu: 'Magyar', en: 'English', de: 'Deutsch', ru: 'Русский' };
-        document.querySelector('#btn-lang .label').textContent = langNames[lang] || lang;
-        
+    
+        const langBtn = document.querySelector('#btn-lang');
+        if (langBtn) {
+            const label = langBtn.querySelector('.label');
+            if (label) {
+                label.textContent = langNames[lang] || lang;
+            }
+            const icon = langBtn.querySelector('.icon');
+            if (icon) {
+                const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', ru: '🇷🇺' };
+                icon.textContent = flags[lang] || '🌐';
+            }
+        }
+    
         const soundBtn = document.getElementById('btn-sound');
         if (soundBtn) {
             const label = soundBtn.querySelector('.label');
@@ -312,7 +325,7 @@ export class App {
                     this.modules.language.t('sound_off');
             }
         }
-        
+    
         // Pont gomb frissítése
         const pointsBtn = document.getElementById('btn-points');
         if (pointsBtn) {
