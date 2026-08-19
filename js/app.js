@@ -295,61 +295,55 @@ export class App {
         }
     }
 
-updateScreenTexts() {
-    // Nyelvi szövegek frissítése a DOM-ban
-    if (this.modules.language) {
-        this.modules.language.applyToDOM();
-    }
+    updateScreenTexts() {
+        // Nyelvi szövegek frissítése a DOM-ban
+        if (this.modules.language) {
+            this.modules.language.applyToDOM();
+        }
     
-    const lang = this.modules.language?.getLanguage() || 'hu';
-    const langNames = { hu: 'Magyar', en: 'English', de: 'Deutsch', ru: 'Русский' };
-    const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', ru: '🇷🇺' };
+        const lang = this.modules.language?.getLanguage() || 'hu';
+        const langNames = { hu: 'Magyar', en: 'English', de: 'Deutsch', ru: 'Русский' };
+        const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', ru: '🇷🇺' };
     
-    // ---- NYELV GOMB ----
-    const langBtn = document.getElementById('btn-lang');
-    if (langBtn) {
-        const label = langBtn.querySelector('.label');
-        if (label) {
-            label.textContent = langNames[lang] || lang;
+        // ---- NYELV GOMB ----
+        const langBtn = document.getElementById('btn-lang');
+        if (langBtn) {
+            const label = langBtn.querySelector('.label');
+            if (label) {
+                label.textContent = langNames[lang] || lang;
+            }
+            const icon = langBtn.querySelector('.icon');
+            if (icon) {
+                icon.textContent = flags[lang] || '🌐';
+            }
         }
-        const icon = langBtn.querySelector('.icon');
-        if (icon) {
-            icon.textContent = flags[lang] || '🌐';
-        }
-    }
     
-    // ---- HANG GOMB ----
-    const soundBtn = document.getElementById('btn-sound');
-    if (soundBtn) {
-        const label = soundBtn.querySelector('.label');
-        if (label) {
-            label.textContent = this.state.soundEnabled ? 
-                (this.modules.language?.t('sound_on') || 'Hang be') : 
-                (this.modules.language?.t('sound_off') || 'Hang ki');
+        // ---- HANG GOMB ----
+        const soundBtn = document.getElementById('btn-sound');
+        if (soundBtn) {
+            const label = soundBtn.querySelector('.label');
+            if (label) {
+                label.textContent = this.state.soundEnabled ? 
+                    (this.modules.language?.t('sound_on') || 'Hang be') : 
+                    (this.modules.language?.t('sound_off') || 'Hang ki');
+            }
+            const icon = soundBtn.querySelector('.icon');
+            if (icon) {
+                icon.textContent = this.state.soundEnabled ? '🔊' : '🔇';
+            }
         }
-        const icon = soundBtn.querySelector('.icon');
-        if (icon) {
-            icon.textContent = this.state.soundEnabled ? '🔊' : '🔇';
-        }
-    }
     
-    // ---- PONT GOMB ----
-    const pointsBtn = document.getElementById('btn-points');
-    if (pointsBtn) {
-        const label = pointsBtn.querySelector('.label');
-        if (label) {
-            const total = this.modules.points?.getCurrentTotal() || 0;
-            label.textContent = total.toString();
-        }
-        const icon = pointsBtn.querySelector('.icon');
-        if (icon) {
-            icon.textContent = '🏆';
+        // ---- PONT GOMB ----
+        const pointsBtn = document.getElementById('btn-points');
+        if (pointsBtn) {
+            const label = pointsBtn.querySelector('.label');
+            if (label) {
+                const total = this.modules.points?.getCurrentTotal() || 0;
+                label.textContent = total.toString();
+            }
+            // Pont gomb ikonja mindig 🏆 marad, nem kell változtatni
         }
     }
-    
-    // ---- HELP ÉS KILÉPÉS GOMBOK (csak ikon, nincs szöveg) ----
-    // Ezeket nem kell frissíteni
-}
 
     // ---------- KÓDSZÁM ELLENŐRZÉS ----------
     validateCode(code, input, errorMsg, continueBtn, supportBtn) {
