@@ -294,116 +294,151 @@ export class App {
             icon.textContent = flags[current] || '🌐';
         }
     }
-
-    updateScreenTexts() {
-        // Nyelvi szövegek frissítése a DOM-ban
-        if (this.modules.language) {
-            this.modules.language.applyToDOM();
+updateScreenTexts() {
+    // Nyelvi szövegek frissítése
+    if (this.modules.language) {
+        this.modules.language.applyToDOM();
+    }
+    
+    const lang = this.modules.language?.getLanguage() || 'hu';
+    const langNames = { hu: 'Magyar', en: 'English', de: 'Deutsch', ru: 'Русский' };
+    const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', ru: '🇷🇺' };
+    
+    // ---- NYELV GOMB ----
+    const langBtn = document.getElementById('btn-lang');
+    if (langBtn) {
+        const label = langBtn.querySelector('.label');
+        if (label) {
+            label.textContent = langNames[lang] || lang;
         }
-    
-        const lang = this.modules.language?.getLanguage() || 'hu';
-        const langNames = { hu: 'Magyar', en: 'English', de: 'Deutsch', ru: 'Русский' };
-        const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', ru: '🇷🇺' };
-    
-        // ---- NYELV GOMB ----
-        const langBtn = document.getElementById('btn-lang');
-        if (langBtn) {
-            const label = langBtn.querySelector('.label');
-            if (label) {
-                label.textContent = langNames[lang] || lang;
-            }
-            const icon = langBtn.querySelector('.icon');
-            if (icon) {
-                icon.textContent = flags[lang] || '🌐';
-            }
-        }
-    
-        // ---- HANG GOMB ----
-        const soundBtn = document.getElementById('btn-sound');
-        if (soundBtn) {
-            const label = soundBtn.querySelector('.label');
-            if (label) {
-                label.textContent = this.state.soundEnabled ? 
-                    (this.modules.language?.t('sound_on') || 'Hang be') : 
-                    (this.modules.language?.t('sound_off') || 'Hang ki');
-            }
-            const icon = soundBtn.querySelector('.icon');
-            if (icon) {
-                icon.textContent = this.state.soundEnabled ? '🔊' : '🔇';
-            }
-        }
-    
-        // ---- PONT GOMB ----
-        const pointsBtn = document.getElementById('btn-points');
-        if (pointsBtn) {
-            const label = pointsBtn.querySelector('.label');
-            if (label) {
-                const total = this.modules.points?.getCurrentTotal() || 0;
-                label.textContent = total.toString();
-            }
-            // Pont gomb ikonja mindig 🏆 marad, nem kell változtatni
+        const icon = langBtn.querySelector('.icon');
+        if (icon) {
+            icon.textContent = flags[lang] || '🌐';
         }
     }
+    
+    // ---- HANG GOMB ----
+    const soundBtn = document.getElementById('btn-sound');
+    if (soundBtn) {
+        const label = soundBtn.querySelector('.label');
+        if (label) {
+            label.textContent = this.state.soundEnabled ? 
+                (this.modules.language?.t('sound_on') || 'Hang be') : 
+                (this.modules.language?.t('sound_off') || 'Hang ki');
+        }
+        const icon = soundBtn.querySelector('.icon');
+        if (icon) {
+            icon.textContent = this.state.soundEnabled ? '🔊' : '🔇';
+        }
+    }
+    
+    // ---- PONT GOMB ----
+    const pointsBtn = document.getElementById('btn-points');
+    if (pointsBtn) {
+        const label = pointsBtn.querySelector('.label');
+        if (label) {
+            const total = this.modules.points?.getCurrentTotal() || 0;
+            label.textContent = total.toString();
+        }
+    }
+    
+    // ---- KÓDSZÁM MEZŐ PLACEHOLDER FRISSÍTÉSE ----
+    const codeInput = document.querySelector('.code-input');
+    if (codeInput) {
+        codeInput.placeholder = this.modules.language?.t('enter_code') || 'Add meg a kódszámodat';
+    }
+    
+    // ---- HIBAÜZENET FRISSÍTÉSE (ha látható) ----
+    const errorMsg = document.querySelector('.error-msg');
+    if (errorMsg && errorMsg.textContent.trim() !== '') {
+        // Ha hibát mutat, frissítsük a szövegét
+        errorMsg.textContent = this.modules.language?.t('invalid_code') || 'Nem jó a kódszám';
+    }
+}
 
     // ---------- KÓDSZÁM ELLENŐRZÉS ----------
-    validateCode(code, input, errorMsg, continueBtn, supportBtn) {
-        const isValid = this.modules.points.validateCode(code);
+validateCode(code, input, errorMsg, continueBtn, supportBtn) {
+    const isValid = this.modules.points.validateCode(code);
+    
+    if (isValid) {
+        this.state.userCode = code;
+        this.state.isCodeValid = true;
+        input.classList.remove('error');
+        errorMsg.textContent = '';
+        errorMsg.style.display = 'none';
+        continueBtn.classList.add('visible');
+        supportBtn.classList.remove('active');
+        // Pontok betöltése a kódhoz
+        this.modules.points.loadPointsForCode(code);
+    } else {
+        this.state.isCodeValid = false;
+        input.classList.add('error');
+        // HASZNÁLD A NYELVI RENDSZERT A HIBAÜZENETHEZ!
+        errorMsg.textContent = this.modules.language?.t('invalid_code') || 'Nem jó a kódszám';
+        errorMsg.style.display = 'block';
+        continueBtn.classList.remove('visible');
+        this.modules.sound.playError();
         
-        if (isValid) {
-            this.state.userCode = code;
-            this.state.isCodeValid = true;
+        // 2 másodperc után töröljük a hibát
+        setTimeout(() => {
             input.classList.remove('error');
             errorMsg.textContent = '';
-            continueBtn.classList.add('visible');
-            supportBtn.classList.remove('active');
-            // Pontok betöltése a kódhoz
-            this.modules.points.loadPointsForCode(code);
-        } else {
-            this.state.isCodeValid = false;
-            input.classList.add('error');
-            errorMsg.textContent = this.modules.language.t('invalid_code');
-            continueBtn.classList.remove('visible');
-            this.modules.sound.playError();
-            
-            // 2 másodperc után töröljük a hibát
-            setTimeout(() => {
-                input.classList.remove('error');
-                errorMsg.textContent = '';
-            }, 2000);
-        }
+            errorMsg.style.display = 'none';
+        }, 2000);
     }
+}
 
     // ---------- VIDEÓ KEZELÉS ----------
-    initIntroVideo() {
-        if (this.videoElement) {
-            // Videó újraindítása
-            this.videoElement.currentTime = 0;
-            this.videoElement.style.display = 'block';
-            if (this.backgroundImage) {
-                this.backgroundImage.style.display = 'none';
-            }
-            // Hang állapot beállítása
-            this.videoElement.muted = !this.state.soundEnabled;
-            
-            // Play attempt (böngészők blokkolhatják)
-            try {
-                const playPromise = this.videoElement.play();
-                if (playPromise) {
-                    playPromise.catch(() => {
-                        // Auto-play blokkolt, nem csinálunk semmit
-                        console.log('🔇 Video auto-play blokkolt, várunk felhasználói interakcióra');
-                    });
-                }
-            } catch (e) {
-                // Fallback: képet mutatunk
+initIntroVideo() {
+    const video = this.videoElement;
+    if (!video) return;
+
+    // Videó visszaállítása
+    video.currentTime = 0;
+    video.style.display = 'block';
+    if (this.backgroundImage) {
+        this.backgroundImage.style.display = 'none';
+    }
+    video.muted = true;
+
+    // Első interakcióra indul a videó
+    const playVideo = () => {
+        if (video.paused) {
+            video.play().catch(() => {
+                // Ha nem sikerül, mutassuk a képet
                 if (this.backgroundImage) {
-                    this.videoElement.style.display = 'none';
+                    video.style.display = 'none';
                     this.backgroundImage.style.display = 'block';
                 }
+            });
+        }
+        // Eseményfigyelők eltávolítása az első interakció után
+        document.removeEventListener('click', playVideo);
+        document.removeEventListener('touchstart', playVideo);
+    };
+
+    // Felhasználói interakcióra várunk
+    document.addEventListener('click', playVideo);
+    document.addEventListener('touchstart', playVideo);
+
+    // Ha 5 másodperc után sem történt interakció, mutassuk a képet
+    setTimeout(() => {
+        if (video.paused) {
+            video.style.display = 'none';
+            if (this.backgroundImage) {
+                this.backgroundImage.style.display = 'block';
             }
         }
-    }
+    }, 5000);
 
+    // Videó végén mutassuk a záróképet
+    video.addEventListener('ended', () => {
+        video.style.display = 'none';
+        if (this.backgroundImage) {
+            this.backgroundImage.style.display = 'block';
+        }
+    });
+}
     // ---------- BÚCSÚZÓ KÉPERNYŐ ----------
     initGoodbyeScreen(data) {
         const screen = this.screens.goodbye;
@@ -434,24 +469,16 @@ export class App {
 
     // ---------- DÁTUM FORMAZÁS ----------
     formatDate(date, lang) {
-        const months = {
-            hu: ['január', 'február', 'március', 'április', 'május', 'június', 
-                 'július', 'augusztus', 'szeptember', 'október', 'november', 'december'],
-            en: ['January', 'February', 'March', 'April', 'May', 'June', 
-                 'July', 'August', 'September', 'October', 'November', 'December'],
-            de: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
-                 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
-            ru: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 
-                 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
-        };
-        
+        // Római számok a hónapokhoz (független a nyelvtől)
+        const romanMonths = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+    
         const year = date.getFullYear();
-        const month = months[lang]?.[date.getMonth()] || months.hu[date.getMonth()];
+        const month = romanMonths[date.getMonth()];
         const day = String(date.getDate()).padStart(2, '0');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
-        
-        return `${year}. ${month} ${day}. ${hours}:${minutes}`;
+    
+        return `${year}. ${month}. ${day}. ${hours}:${minutes}`;
     }
 
     // ---------- KILÉPÉS ----------
