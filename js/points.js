@@ -216,27 +216,18 @@ export class PointsManager {
     }
 
     // ---------- IDŐPONT FORMAZÁS ----------
-    formatTimestamp(date) {
-        const lang = window.GeryApp?.state?.language || 'hu';
-        const months = {
-            hu: ['január', 'február', 'március', 'április', 'május', 'június', 
-                 'július', 'augusztus', 'szeptember', 'október', 'november', 'december'],
-            en: ['January', 'February', 'March', 'April', 'May', 'June', 
-                 'July', 'August', 'September', 'October', 'November', 'December'],
-            de: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
-                 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
-            ru: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 
-                 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
-        };
-        
-        const year = date.getFullYear();
-        const month = months[lang]?.[date.getMonth()] || months.hu[date.getMonth()];
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        
-        return `${year}. ${month} ${day}. ${hours}:${minutes}`;
-    }
+formatTimestamp(date) {
+    // Római számok a hónapokhoz (független a nyelvtől)
+    const romanMonths = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+    
+    const year = date.getFullYear();
+    const month = romanMonths[date.getMonth()];
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}. ${month}. ${day}. ${hours}:${minutes}`;
+}
 
     // ---------- LOCALSTORAGE MENTÉS ----------
     saveToLocalStorage(code, points, timestamp) {
@@ -331,40 +322,66 @@ export class PointsManager {
     }
 
     // ---------- RANGLISTA MEGJELENÍTÉS ----------
-    showRanking() {
-        // Rendezés pont szerint csökkenő
-        const sorted = [...this.pointsData].sort((a, b) => b.points - a.points);
+showRanking() {
+    // Rendezés pont szerint csökkenő
+    const sorted = [...this.pointsData].sort((a, b) => b.points - a.points);
+    
+    // Top 10
+    const top10 = sorted.slice(0, 10);
+    
+    // Aktuális játékos keresése
+    const currentCode = window.GeryApp?.state?.userCode;
+    const currentSessionPoints = window.GeryApp?.state?.totalPoints || 0;
+    
+    let currentRecord = null;
+    let currentInTop10 = false;
+    
+    if (currentCode) {
+        // Keresés a mentett rekordok között
+        const existingRecord = sorted.find(r => r.code === currentCode);
         
-        // Top 10
-        const top10 = sorted.slice(0, 10);
-        
-        // Aktuális játékos keresése
-        const currentCode = window.GeryApp?.state?.userCode;
-        let currentRecord = null;
-        let currentInTop10 = false;
-        
-        if (currentCode) {
-            currentRecord = sorted.find(r => r.code === currentCode);
-            currentInTop10 = top10.some(r => r.code === currentCode);
+        if (existingRecord) {
+            // Ha van mentett rekord, de a session pontok többek, akkor a session pontokat használjuk
+            const maxPoints = Math.max(existingRecord.points, currentSessionPoints);
+            currentRecord = {
+                code: currentCode,
+                points: maxPoints,
+                timestamp: existingRecord.timestamp || '-'
+            };
+        } else if (currentSessionPoints > 0) {
+            // Ha nincs mentett rekord, de van session pont
+            currentRecord = {
+                code: currentCode,
+                points: currentSessionPoints,
+                timestamp: this.formatTimestamp(new Date()) || '-'
+            };
         }
+        
+        if (currentRecord) {
+            currentInTop10 = top10.some(r => r.code === currentCode && r.points >= currentRecord.points);
+        }
+    }
 
-        // Ranglista HTML előállítása
-        let html = `
-            <div class="modal-overlay active" id="ranking-modal">
-                <div class="modal-box">
-                    <div class="modal-header">
-                        <h3>🏆 ${window.GeryApp?.modules?.language?.t('points_title') || 'Ranglista'}</h3>
-                        <button class="modal-close" onclick="document.getElementById('ranking-modal').remove()">✕</button>
+    // Ranglista HTML előállítása
+    const lang = window.GeryApp?.modules?.language;
+    let html = `
+        <div class="modal-overlay active" id="ranking-modal">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h3>🏆 ${lang?.t('points_title') || 'Ranglista'}</h3>
+                    <button class="modal-close" onclick="document.getElementById('ranking-modal').remove()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div style="margin-bottom:12px;font-weight:700;color:var(--brown-dark);">
+                        ${lang?.t('points_top10') || 'Top 10'}
                     </div>
-                    <div class="modal-body">
-                        <div style="margin-bottom:12px;font-weight:700;color:var(--brown-dark);">
-                            ${window.GeryApp?.modules?.language?.t('points_top10') || 'Top 10'}
-                        </div>
-        `;
+    `;
 
-        if (top10.length === 0) {
-            html += `<div class="rank-empty">${window.GeryApp?.modules?.language?.t('points_empty') || 'Még nincs pontszám'}</div>`;
-        } else {
+    if (top10.length === 0 && (!currentRecord || currentRecord.points === 0)) {
+        html += `<div class="rank-empty">${lang?.t('points_empty') || 'Még nincs pontszám'}</div>`;
+    } else {
+        // Top 10 mutatása
+        if (top10.length > 0) {
             top10.forEach((record, index) => {
                 const isCurrent = record.code === currentCode;
                 html += `
@@ -383,10 +400,10 @@ export class PointsManager {
             html += `
                 <div class="rank-divider">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</div>
                 <div style="margin-bottom:8px;font-weight:700;color:var(--brown-dark);font-size:0.85rem;">
-                    🎯 ${window.GeryApp?.modules?.language?.t('points_current') || 'Te'}
+                    🎯 ${lang?.t('points_current') || 'Te'}
                 </div>
                 <div class="rank-item current">
-                    <span class="rank-pos">#${sorted.indexOf(currentRecord) + 1}</span>
+                    <span class="rank-pos">#${sorted.findIndex(r => r.code === currentCode) + 1 || '?'}</span>
                     <span class="rank-code">${currentRecord.code}</span>
                     <span class="rank-points">${currentRecord.points}</span>
                     <span class="rank-time">${currentRecord.timestamp}</span>
@@ -394,44 +411,46 @@ export class PointsManager {
             `;
         }
 
-        // Ha nincs rekord az aktuális játékosnak
-        if (!currentRecord && currentCode) {
+        // Ha nincs rekord az aktuális játékosnak, de van session pont
+        if (!currentRecord && currentCode && currentSessionPoints > 0) {
             html += `
                 <div class="rank-divider">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</div>
                 <div style="margin-bottom:8px;font-weight:700;color:var(--brown-dark);font-size:0.85rem;">
-                    🎯 ${window.GeryApp?.modules?.language?.t('points_current') || 'Te'}
+                    🎯 ${lang?.t('points_current') || 'Te'}
                 </div>
-                <div class="rank-item" style="color:var(--gray-light);">
+                <div class="rank-item current">
+                    <span class="rank-pos">${sorted.length + 1}</span>
                     <span class="rank-code">${currentCode}</span>
-                    <span class="rank-points">0</span>
-                    <span class="rank-time">-</span>
+                    <span class="rank-points">${currentSessionPoints}</span>
+                    <span class="rank-time">${this.formatTimestamp(new Date()) || '-'}</span>
                 </div>
             `;
         }
+    }
 
-        html += `
-                    </div>
+    html += `
                 </div>
             </div>
-        `;
+        </div>
+    `;
 
-        // Modal hozzáadása a DOM-hoz
-        const modalContainer = document.createElement('div');
-        modalContainer.innerHTML = html;
-        document.body.appendChild(modalContainer.firstElementChild);
+    // Modal hozzáadása a DOM-hoz
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = html;
+    document.body.appendChild(modalContainer.firstElementChild);
 
-        // Bezárás gomb működése
-        document.querySelector('#ranking-modal .modal-close')?.addEventListener('click', () => {
-            document.getElementById('ranking-modal')?.remove();
-        });
+    // Bezárás gomb működése
+    document.querySelector('#ranking-modal .modal-close')?.addEventListener('click', () => {
+        document.getElementById('ranking-modal')?.remove();
+    });
 
-        // Háttérre kattintva bezárás
-        document.getElementById('ranking-modal')?.addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) {
-                e.target.remove();
-            }
-        });
-    }
+    // Háttérre kattintva bezárás
+    document.getElementById('ranking-modal')?.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            e.target.remove();
+        }
+    });
+}
 
     // ---------- AKTUÁLIS PONTSZÁM LEKÉRÉSE ----------
     getCurrentTotal() {
