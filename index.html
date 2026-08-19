@@ -24,7 +24,75 @@
     <!-- FŐ ALKALMAZÁS TÁROLÓ                                         -->
     <!-- ============================================================ -->
     <div id="app">
-        <!-- A képernyőket a JavaScript fogja dinamikusan betölteni -->
+        <!-- A képernyőket a JavaScript fogja dinamikusan betölteni. ez volt a terv,de mégsem történik meg. Következik a javítás. -->
+        <!-- ============================================================ -->
+        <!-- NYITÓ KÉPERNYŐ                                                -->
+        <!-- ============================================================ -->
+        <div id="screen-intro" class="screen">
+            <video class="background-video" muted playsinline loop>
+                <source src="assets/video/intro.mp4" type="video/mp4">
+            </video>
+            <img class="background-image" src="assets/images/background.jpg" alt="Háttér" style="display:none;">
+            <div class="overlay"></div>
+            <div class="content">
+                <button class="support-btn" data-i18n="support_btn">Támogatom Geryt, a hegyi macskát</button>
+                <div class="code-row">
+                    <input class="code-input" type="text" maxlength="6" placeholder="Kódszám" disabled>
+                    <button class="continue-btn" data-i18n="continue_btn">Tovább</button>
+                </div>
+                <div class="error-msg"></div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- JÁTÉK MENÜ                                                    -->
+        <!-- ============================================================ -->
+        <div id="screen-menu" class="screen">
+            <div class="menu-title" data-i18n="menu_title">Játszva támogatom Geryt, a hegyi macskát</div>
+            <div class="games-grid">
+                <!-- A játékokat a JavaScript tölti be dinamikusan -->
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- JÁTÉK KÉPERNYŐ                                                -->
+        <!-- ============================================================ -->
+        <div id="screen-game" class="screen">
+            <div class="game-container">
+                <div class="game-header">
+                    <div class="game-title">Játék</div>
+                    <div class="game-multiplier-display">Szorzó: <span>×1</span></div>
+                    <button class="game-exit-btn" style="background:transparent;border:none;font-size:1.5rem;cursor:pointer;color:#c0392b;">⬆</button>
+                </div>
+                <div class="game-content">
+                    <div class="placeholder-text">🎮 Játék betöltése...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- BÚCSÚZÓ KÉPERNYŐ                                              -->
+        <!-- ============================================================ -->
+        <div id="screen-goodbye" class="screen">
+            <img class="goodbye-image" src="assets/images/goodbye.jpg" alt="Viszlát!">
+            <div class="overlay"></div>
+            <div class="content">
+                <h2 data-i18n="goodbye_title">Viszlát! 🐱</h2>
+                <p data-i18n="goodbye_points">Összegyűjtött pontjaid:</p>
+                <div class="points-display">0</div>
+                <p data-i18n="goodbye_code">Kódszámod:</p>
+                <div class="code-display">----</div>
+                <p class="date-display"></p>
+                <p style="margin-top:16px;font-size:0.9rem;opacity:0.7;" data-i18n="goodbye_thanks">Köszönjük, hogy játszottál!</p>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ADMIN KÉPERNYŐ                                                -->
+        <!-- ============================================================ -->
+        <div id="screen-admin" class="screen">
+            <!-- Az admin felületet a JavaScript tölti be -->
+        </div>
     </div>
 
     <!-- ============================================================ -->
