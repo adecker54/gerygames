@@ -112,7 +112,7 @@ export class SoundManager {
                 clone.volume = 0.3;
                 clone.play().catch(() => {});
                 // Automatikus cleanup
-                setTimeout(() => clone.remove(), 2000);
+                setTimeout(() => clone.remove(), 3000);
             } else if (sound.play) {
                 // Fallback hang
                 sound.play();

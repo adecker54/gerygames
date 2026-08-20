@@ -223,10 +223,8 @@ export class App {
     setupFixedButtons() {
         // Help
         document.getElementById('btn-help')?.addEventListener('click', () => {
-            this.modules.sound.playClick();
-            const text = this.modules.language.t('help_text');
-            const title = this.modules.language.t('help_title');
-            alert(`${title}\n\n${text}`);
+        this.modules.sound.playClick();
+        this.showHelpModal();
         });
 
         // Nyelv váltás
@@ -294,6 +292,35 @@ export class App {
             icon.textContent = flags[current] || '🌐';
         }
     }
+
+showHelpModal() {
+    <div class="help-text">${text}</div>
+    const lang = this.modules.language;
+    const title = lang?.t('help_title') || 'Súgó';
+    const text = lang?.t('help_text') || 'Ez itt az információs ablak';
+    
+    const modal = document.createElement('div');
+    modal.className = 'help-modal-overlay';
+    modal.id = 'help-modal';
+    modal.innerHTML = `
+        <div class="help-modal-box">
+            <div class="help-icon">❓</div>
+            <h2>${title}</h2>
+            <div class="help-text">${text}</div>
+            <button class="help-close-btn" data-i18n="help_close">Bezárás</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Bezárás
+    const closeBtn = modal.querySelector('.help-close-btn');
+    closeBtn.addEventListener('click', () => modal.remove());
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
 updateScreenTexts() {
     // Nyelvi szövegek frissítése
     if (this.modules.language) {
@@ -399,7 +426,11 @@ initIntroVideo() {
     if (this.backgroundImage) {
         this.backgroundImage.style.display = 'none';
     }
-    video.muted = true;
+    // HANG BEÁLLÍTÁSA
+    video.muted = !this.state.soundEnabled;
+        if (!this.state.soundEnabled) {
+            video.volume = 0.5;
+        }
 
     // Első interakcióra indul a videó
     const playVideo = () => {
@@ -421,7 +452,7 @@ initIntroVideo() {
     document.addEventListener('click', playVideo);
     document.addEventListener('touchstart', playVideo);
 
-    // Ha 5 másodperc után sem történt interakció, mutassuk a képet
+    // Ha 10 másodperc után sem történt interakció, mutassuk a képet
     setTimeout(() => {
         if (video.paused) {
             video.style.display = 'none';
@@ -429,16 +460,19 @@ initIntroVideo() {
                 this.backgroundImage.style.display = 'block';
             }
         }
-    }, 5000);
+    }, 10000);
 
-    // Videó végén mutassuk a záróképet
-    video.addEventListener('ended', () => {
+    // Videó végén mutassuk a záróképet - nem loop
+    video.removeEventListener('ended', this.videoEndHandler);
+    this.videoEndHandler = () => {
         video.style.display = 'none';
         if (this.backgroundImage) {
             this.backgroundImage.style.display = 'block';
         }
-    });
+    };
+    video.addEventListener('ended', this.videoEndHandler);
 }
+
     // ---------- BÚCSÚZÓ KÉPERNYŐ ----------
     initGoodbyeScreen(data) {
         const screen = this.screens.goodbye;
