@@ -318,7 +318,7 @@ showHelpModal() {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.remove();
     });
-    <div class="help-text">${text}</div>
+    <div class="help-text">${text}</div>;
 }
 
 updateScreenTexts() {
