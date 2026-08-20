@@ -294,7 +294,6 @@ export class App {
     }
 
 showHelpModal() {
-    <div class="help-text">${text}</div>
     const lang = this.modules.language;
     const title = lang?.t('help_title') || 'Súgó';
     const text = lang?.t('help_text') || 'Ez itt az információs ablak';
@@ -319,6 +318,7 @@ showHelpModal() {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.remove();
     });
+    <div class="help-text">${text}</div>
 }
 
 updateScreenTexts() {
