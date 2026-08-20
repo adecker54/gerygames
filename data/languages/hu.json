@@ -6,7 +6,7 @@
     "continue_btn": "Tovább",
     "invalid_code": "Nem jó a kódszám",
     "help_title": "Súgó",
-    "help_text": "Ez egy Web3 játék keretrendszer. Csatlakoztasd a tárcádat, add meg a kódszámodat, és kezdődhet a játék!",
+    "help_text": "<strong>📖 Üdvözlünk a játékban!</strong><br><br>Ez a Web3 játékkeretrendszer lehetővé teszi, hogy <span style='color:#8B6B4F;font-weight:700;'>támogasd Geryt</span>, a hegyi macskát.<br><br>🎯 <strong>Hogyan működik?</strong><br>1. Add meg a kódszámodat<br>2. Válassz egy játékot<br>3. Gyűjts minél több pontot!<br><br>📌 <em>Minden játéknak más a szorzója!</em><br><br>🐱 <strong>Jó szórakozást!</strong>",    
     "language_hu": "Magyar",
     "language_en": "Angol",
     "language_de": "Német",
@@ -22,7 +22,7 @@
     "points_score": "Pont",
     "points_time": "Időpont",
     "exit_confirm": "Biztosan kilépsz?",
-    "goodbye_title": "Viszlát! 🐱",
+    "goodbye_title": "Viszlát!",
     "goodbye_points": "Összegyűjtött pontjaid:",
     "goodbye_code": "Kódszámod:",
     "goodbye_thanks": "Köszönjük, hogy játszottál!",
@@ -31,6 +31,8 @@
     "game_name_3": "Szerencsejáték 1",
     "game_name_4": "Szerencsejáték 2",
     "multiplier_label": "Szorzó:",
+    "help_close": "Bezárás",
+    "telegram_btn": "📱 Csatlakozz Gery-hez a Telegramon!"
     "admin_title": "Admin felület",
     "admin_save": "Mentés",
     "admin_close": "Bezárás"

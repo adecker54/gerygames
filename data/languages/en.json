@@ -6,7 +6,7 @@
     "continue_btn": "Continue",
     "invalid_code": "Invalid code",
     "help_title": "Help",
-    "help_text": "This is a Web3 game framework. Connect your wallet, enter your code, and let's play!",
+    "help_text": "This is the <strong>information window</strong>.<br><br>Use the <span style='color:#8B6B4F;font-weight:700;'>I support Gery</span> button to enter your code.<br><br>📌 <em>Have fun!</em>",
     "language_hu": "Hungarian",
     "language_en": "English",
     "language_de": "German",
