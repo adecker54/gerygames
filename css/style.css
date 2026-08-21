@@ -266,9 +266,11 @@ body {
     opacity: 0.6;
 }
 
+/* hiba esetén*/
 #screen-intro .code-input.error {
-    border-color: #c0392b;
-    background: #fde8e8;
+    border-color: #c0392b !important;
+    background: #fde8e8 !important;
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.2) !important;
 }
 
 #screen-intro .continue-btn {
@@ -298,13 +300,29 @@ body {
 }
 
 #screen-intro .error-msg {
-    color: #c0392b;
-    font-size: 0.9rem;
-    margin-top: 8px;
-    min-height: 24px;
-    font-weight: 600;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+    color: #ffffff !important;
+    background: #c0392b !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    padding: 12px 20px !important;
+    border-radius: 12px !important;
+    margin-top: 12px !important;
+    min-height: 48px !important;
+    text-align: center !important;
+    box-shadow: 0 4px 20px rgba(192, 57, 43, 0.4) !important;
+    display: none;
+    animation: shake 0.5s ease;
 }
+
+/* Rázás animáció */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+}
+
 
 /* ---------- FIX 5 GOMB (minden képernyőn) ---------- */
 .fixed-buttons {
