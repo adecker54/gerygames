@@ -302,16 +302,17 @@ body {
 #screen-intro .error-msg {
     color: #ffffff !important;
     background: #c0392b !important;
-    font-size: 1.1rem !important;
+    font-size: 1.5rem !important;
     font-weight: 700 !important;
     padding: 12px 20px !important;
+    border: 3px solid #a93226 !important;  /* ← vastag piros keret */
     border-radius: 12px !important;
     margin-top: 12px !important;
     min-height: 48px !important;
     text-align: center !important;
     box-shadow: 0 4px 20px rgba(192, 57, 43, 0.4) !important;
     display: none;
-    animation: shake 0.5s ease;
+    animation: shake 2s ease;
 }
 
 /* Rázás animáció */
@@ -324,10 +325,10 @@ body {
 }
 
 
-/* ---------- FIX 5 GOMB (minden képernyőn) ---------- */
+/* ---------- FIX 5 GOMB (minden képernyőn) ----------itt a bottom részt kell kallibrálni */
 .fixed-buttons {
     position: absolute;
-    bottom: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     left: 16px;
     right: 16px;
     display: flex;
