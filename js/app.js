@@ -394,23 +394,23 @@ validateCode(code, input, errorMsg, continueBtn, supportBtn) {
         errorMsg.style.display = 'none';
         continueBtn.classList.add('visible');
         supportBtn.classList.remove('active');
-        // Pontok betöltése a kódhoz
         this.modules.points.loadPointsForCode(code);
     } else {
         this.state.isCodeValid = false;
         input.classList.add('error');
-        // HASZNÁLD A NYELVI RENDSZERT A HIBAÜZENETHEZ!
-        errorMsg.textContent = this.modules.language?.t('invalid_code') || 'Nem jó a kódszám';
+        
+        // HIBAÜZENET MEGJELENÍTÉSE - JOBB DESIGN
+        errorMsg.textContent = this.modules.language?.t('invalid_code') || '❌ Nem jó a kódszám!';
         errorMsg.style.display = 'block';
+        
         continueBtn.classList.remove('visible');
         this.modules.sound.playError();
         
-        // 2 másodperc után töröljük a hibát
+        // 3 MÁSODPERCIG LÁTHATÓ
         setTimeout(() => {
             input.classList.remove('error');
-            errorMsg.textContent = '';
             errorMsg.style.display = 'none';
-        }, 2000);
+        }, 3000);
     }
 }
 
