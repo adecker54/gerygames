@@ -89,19 +89,20 @@ export class App {
 
         // Képernyő specifikus inicializálás
         if (screenName === 'intro') {
-            this.initIntroVideo();
-        } else if (screenName === 'menu') {
-            this.modules.games.renderMenu();
-        } else if (screenName === 'goodbye') {
-            this.initGoodbyeScreen(data);
-        } else if (screenName === 'admin') {
-            if (this.state.isAdmin) {
-                this.modules.admin.render();
-            } else {
-                // Ha nem admin, vissza a főképernyőre
-                this.showScreen('intro');
+        // Pontok nullázása, ha nem a kilépés után jöttünk ide
+        if (this.currentScreen !== 'goodbye') {
+            this.state.totalPoints = 0;
+            this.state.sessionPoints = 0;
+            this.state.gameScores = [0, 0, 0, 0];
+            this.state.isCodeValid = false;
+            this.state.userCode = null;
+        
+            const pointsLabel = document.querySelector('#btn-points .label');
+            if (pointsLabel) {
+                pointsLabel.textContent = '0';
             }
         }
+        this.initIntroVideo();
 
         // Nyelvi frissítés
         this.updateScreenTexts();
@@ -213,11 +214,62 @@ export class App {
     }
 
     setupGoodbyeScreen() {
-        // A búcsúzó képernyőt dinamikusan töltjük
+        const screen = this.screens.goodbye;
+        if (!screen) return;
+
+        // ---- VISSZA A KEZDŐKÉPERNYŐRE GOMB ----
+            const backBtn = document.getElementById('back-to-start-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                this.modules.sound.playClick();
+            
+                // Pontok nullázása
+                this.state.totalPoints = 0;
+                this.state.sessionPoints = 0;
+                this.state.gameScores = [0, 0, 0, 0];
+                this.state.isCodeValid = false;
+                this.state.userCode = null;
+            
+                // Pont gomb frissítése
+                const pointsLabel = document.querySelector('#btn-points .label');
+                if (pointsLabel) {
+                    pointsLabel.textContent = '0';
+                }
+            
+                // Vissza a nyitóképernyőre
+                this.showScreen('intro');
+            });
+        }
     }
 
     setupAdminScreen() {
         // Admin képernyőt az AdminManager kezeli
+        const screen = this.screens.goodbye;
+        if (!screen) return;
+
+        // ---- VISSZA A KEZDŐKÉPERNYŐRE GOMB ----
+        const backBtn = document.getElementById('back-to-start-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                this.modules.sound.playClick();
+            
+                // Pontok nullázása
+                this.state.totalPoints = 0;
+                this.state.sessionPoints = 0;
+                this.state.gameScores = [0, 0, 0, 0];
+                this.state.isCodeValid = false;
+                this.state.userCode = null;
+            
+                // Pont gomb frissítése
+                const pointsLabel = document.querySelector('#btn-points .label');
+                if (pointsLabel) {
+                    pointsLabel.textContent = '0';
+                }
+             
+                // Vissza a nyitóképernyőre
+                this.showScreen('intro');
+            });
+        }
     }
 
     setupFixedButtons() {
@@ -520,22 +572,29 @@ initIntroVideo() {
         await this.modules.points.savePoints(
             this.state.userCode,
             this.state.totalPoints,
-            this.state.gameScores
+           this.state.gameScores
         );
 
-        // 2. Búcsúzó képernyő megjelenítése
-        await this.showScreen('goodbye', {
-            points: this.state.totalPoints
-        });
+        // 2. ÁLLÍTSD VISSZA A PONTOKAT 0-RA (AZ ÚJ JÁTÉKHOZ)
+        this.state.totalPoints = 0;
+        this.state.sessionPoints = 0;
+        this.state.gameScores = [0, 0, 0, 0];
+        this.state.isCodeValid = false;
+        this.state.userCode = null;
 
-        // 3. Sound lejátszás (ha engedélyezett)
-        if (this.state.soundEnabled) {
-            // Győzelmi hang a búcsúzáskor? Inkább egy halk hang
+        // 3. Pont gomb frissítése
+        const pointsLabel = document.querySelector('#btn-points .label');
+        if (pointsLabel) {
+            pointsLabel.textContent = '0';
         }
 
-        console.log(`👋 Kilépés: ${this.state.userCode} | ${this.state.totalPoints} pont`);
-    }
+        // 4. Búcsúzó képernyő megjelenítése
+        await this.showScreen('goodbye', {
+            points: 0  // Itt már 0-t mutatunk, mert újraindul
+        });
 
+        console.log(`👋 Kilépés: ${this.state.userCode} | Pontok nullázva`);
+    }
     // ---------- JÁTÉK INDÍTÁS ----------
     startGame(gameId) {
         const game = this.state.games.find(g => g.id === gameId);
