@@ -8,7 +8,6 @@
     "help_title": "Hilfe",
     "help_text": "Dies ist das <strong>Informationsfenster</strong>.<br><br>Verwende die Schaltfläche <span style=‚color:#8B6B4F;font-weight:700;‘>Ich unterstütze Gery</span>, um die Codenummer einzugeben.<br><br>📌 <em>Viel Spaß!</em>",
     "help_close": "Schließen",
-    "telegram_btn": "📱 Folge Gery auf Telegram!",
     "language_hu": "Ungarisch",
     "language_en": "Englisch",
     "language_de": "Deutsch",
@@ -33,6 +32,8 @@
     "game_name_3": "Glücksspiel 1",
     "game_name_4": "Glücksspiel 2",
     "multiplier_label": "Multiplikator:",
+    "telegram_btn": "📱 Folge Gery auf Telegram!",
+    "vote_btn": "Unterstütze GERY auch mit deiner Stimme!",
     "admin_title": "Admin-Bereich",
     "admin_save": "Speichern",
     "admin_close": "Schließen"

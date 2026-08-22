@@ -8,7 +8,6 @@
     "help_title": "Помощь",
     "help_text": "Это <strong>информационное окно</strong>.<br><br>Нажмите кнопку <span style=„color:#8B6B4F;font-weight:700;“>«Поддержу Гери»</span>, чтобы ввести код.<br><br>📌 <em>Приятного просмотра!</em>",
     "help_close": "Закрыть",
-    "telegram_btn": "📱 Присоединяйся к Gery в Telegram!",
     "language_hu": "Венгерский",
     "language_en": "Английский",
     "language_de": "Немецкий",
@@ -33,6 +32,8 @@
     "game_name_3": "Игра удачи 1",
     "game_name_4": "Игра удачи 2",
     "multiplier_label": "Множитель:",
+    "telegram_btn": "📱 Присоединяйся к Gery в Telegram!",
+    "vote_btn": "Поддержите GERY своим голосом!",
     "admin_title": "Панель администратора",
     "admin_save": "Сохранить",
     "admin_close": "Закрыть"
