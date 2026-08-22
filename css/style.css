@@ -328,7 +328,7 @@ body {
 /* ---------- FIX 5 GOMB (minden képernyőn) ----------itt a bottom részt kell kallibrálni */
 .fixed-buttons {
     position: absolute;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    top: 16px;
     left: 16px;
     right: 16px;
     display: flex;
