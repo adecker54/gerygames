@@ -461,6 +461,7 @@ validateCode(code, input, errorMsg, continueBtn, supportBtn) {
         // 3 MÁSODPERCIG LÁTHATÓ
         setTimeout(() => {
             input.classList.remove('error');
+            errorMsg.textContent = '';
             errorMsg.style.display = 'none';
         }, 3000);
     }
