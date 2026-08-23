@@ -60,35 +60,34 @@ export class App {
         console.log('✅ App inicializálva');
     }
 
-    // ---------- KÉPERNYŐ VÁLTÁS ----------
-    async showScreen(screenName, data = null) {
-        // Kilépés előtti mentés (ha menüből vagy játékból lépünk ki)
-        if (this.currentScreen === 'game' && screenName !== 'game' && screenName !== 'goodbye') {
-            // Itt még nem mentünk, csak ha tényleg kilépés
+async showScreen(screenName, data = null) {
+    // Kilépés előtti mentés (ha menüből vagy játékból lépünk ki)
+    if (this.currentScreen === 'game' && screenName !== 'game' && screenName !== 'goodbye') {
+        // Itt még nem mentünk, csak ha tényleg kilépés
+    }
+
+    // Összes képernyő elrejtése
+    Object.values(this.screens).forEach(el => {
+        if (el) {
+            el.classList.remove('active', 'fade-in');
+            el.style.display = 'none';
         }
+    });
 
-        // Összes képernyő elrejtése
-        Object.values(this.screens).forEach(el => {
-            if (el) {
-                el.classList.remove('active', 'fade-in');
-                el.style.display = 'none';
-            }
-        });
+    // Kiválasztott képernyő megjelenítése
+    const target = this.screens[screenName];
+    if (target) {
+        target.style.display = 'flex';
+        // Kis késleltetés a display változás után
+        await new Promise(r => setTimeout(r, 50));
+        target.classList.add('active', 'fade-in');
+    }
 
-        // Kiválasztott képernyő megjelenítése
-        const target = this.screens[screenName];
-        if (target) {
-            target.style.display = 'flex';
-            // Kis késleltetés a display változás után
-            await new Promise(r => setTimeout(r, 50));
-            target.classList.add('active', 'fade-in');
-        }
+    this.currentScreen = screenName;
+    this.state.currentScreen = screenName;
 
-        this.currentScreen = screenName;
-        this.state.currentScreen = screenName;
-
-        // Képernyő specifikus inicializálás
-        if (screenName === 'intro') {
+    // Képernyő specifikus inicializálás
+    if (screenName === 'intro') {
         // Pontok nullázása, ha nem a kilépés után jöttünk ide
         if (this.currentScreen !== 'goodbye') {
             this.state.totalPoints = 0;
@@ -103,13 +102,25 @@ export class App {
             }
         }
         this.initIntroVideo();
-
-        // Nyelvi frissítés
-        this.updateScreenTexts();
-        this.modules.language.applyToDOM();
-
-        console.log(`📱 Képernyő váltás: ${screenName}`);
+    } else if (screenName === 'menu') {
+        this.modules.games.renderMenu();
+    } else if (screenName === 'goodbye') {
+        this.initGoodbyeScreen(data);
+    } else if (screenName === 'admin') {
+        if (this.state.isAdmin) {
+            this.modules.admin.render();
+        } else {
+            // Ha nem admin, vissza a főképernyőre
+            this.showScreen('intro');
+        }
     }
+
+    // Nyelvi frissítés
+    this.updateScreenTexts();
+    this.modules.language.applyToDOM();
+
+    console.log(`📱 Képernyő váltás: ${screenName}`);
+}
 
     // ---------- KÉPERNYŐK BEÁLLÍTÁSA ----------
     setupIntroScreen() {
