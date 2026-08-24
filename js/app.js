@@ -30,7 +30,8 @@ export class App {
             menu: document.getElementById('screen-menu'),
             game: document.getElementById('screen-game'),
             goodbye: document.getElementById('screen-goodbye'),
-            admin: document.getElementById('screen-admin')
+            admin: document.getElementById('screen-admin'),
+            admin: document.getElementById('screen-links')
         };
 
         // Admin ellenőrzés (URL paraméter)
@@ -44,6 +45,7 @@ export class App {
         this.setupMenuScreen();
         this.setupGameScreen();
         this.setupGoodbyeScreen();
+        this.setupLinksScreen();
         this.setupAdminScreen();
         this.setupFixedButtons();
 
@@ -253,6 +255,35 @@ async showScreen(screenName, data = null) {
         }
     }
 
+    setupLinksScreen() {
+        const screen = this.screens.links;
+        if (!screen) return;
+
+        // ---- LINK GOMBOK ----
+        const linkBtns = screen.querySelectorAll('.link-btn');
+        linkBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // "Látogatott" állapot beállítása
+                btn.classList.add('visited');
+                const status = btn.querySelector('.link-status');
+                if (status) {
+                    status.textContent = '✅';
+                }
+                // Hang
+                this.modules.sound.playClick();
+            });
+        });
+
+        // ---- VISSZA GOMB ----
+        const backBtn = document.getElementById('back-from-links-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                this.modules.sound.playClick();
+                this.showScreen('menu');
+            });
+        }
+    }
+
     setupAdminScreen() {
         // Admin képernyőt az AdminManager kezeli
         const screen = this.screens.goodbye;
@@ -327,6 +358,12 @@ async showScreen(screenName, data = null) {
         document.getElementById('btn-points')?.addEventListener('click', () => {
             this.modules.sound.playClick();
             this.modules.points.showRanking();
+        });
+
+        // Linkek / Szavazáshoz
+        document.getElementById('show-links-btn')?.addEventListener('click', () => {
+        this.modules.sound.playClick();
+        this.showScreen('links');
         });
 
         // Kilépés
@@ -564,7 +601,7 @@ initIntroVideo() {
         }, 5000);
     }
 
-    // ---------- DÁTUM FORMAZÁS ----------
+    // ---------- DÁTUM FORMÁZÁS ----------
     formatDate(date, lang) {
         // Római számok a hónapokhoz (független a nyelvtől)
         const romanMonths = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
