@@ -90,7 +90,7 @@ async showScreen(screenName, data = null) {
 
     // Képernyő specifikus inicializálás
     if (screenName === 'intro') {
-        // Pontok nullázása, ha nem a kilépés után jöttünk ide
+        // Pontok nullázása, ha nem a kilépés után jöttünk ide, de a pontszámot megtartjuk a kilépés után is
         if (this.currentScreen !== 'goodbye') {
             this.state.totalPoints = 0;
             this.state.sessionPoints = 0;
@@ -574,32 +574,28 @@ initIntroVideo() {
 }
 
     // ---------- BÚCSÚZÓ KÉPERNYŐ ----------
-    initGoodbyeScreen(data) {
-        const screen = this.screens.goodbye;
-        if (!screen) return;
-        
-        const pointsDisplay = screen.querySelector('.points-display');
-        const codeDisplay = screen.querySelector('.code-display');
-        const dateDisplay = screen.querySelector('.date-display');
-        
-        if (pointsDisplay) {
-            pointsDisplay.textContent = (data?.points || this.state.totalPoints || 0);
-        }
-        if (codeDisplay) {
-            codeDisplay.textContent = this.state.userCode || '----';
-        }
-        if (dateDisplay) {
-            const now = new Date();
-            const lang = this.modules.language.getLanguage();
-            const dateStr = this.formatDate(now, lang);
-            dateDisplay.textContent = dateStr;
-        }
-
-        // Kilépés utáni automatikus zárás (5 másodperc múlva)
-        setTimeout(() => {
-            // Itt lehetne egy "Bezárás" gomb, de most csak a képernyő marad
-        }, 5000);
+initGoodbyeScreen(data) {
+    const screen = this.screens.goodbye;
+    if (!screen) return;
+    
+    const pointsDisplay = screen.querySelector('.points-display');
+    const codeDisplay = screen.querySelector('.code-display');
+    const dateDisplay = screen.querySelector('.date-display');
+    
+    if (pointsDisplay) {
+        pointsDisplay.textContent = data?.points || 0;
     }
+    if (codeDisplay) {
+        // HASZNÁLD AZ ÁTADOTT KÓDSZÁMOT, VAGY A STATE-BŐL
+        codeDisplay.textContent = data?.code || this.state.userCode || '----';
+    }
+    if (dateDisplay) {
+        const now = new Date();
+        const lang = this.modules.language.getLanguage();
+        const dateStr = this.formatDate(now, lang);
+        dateDisplay.textContent = dateStr;
+    }
+}
 
     // ---------- DÁTUM FORMÁZÁS ----------
     formatDate(date, lang) {
@@ -616,34 +612,42 @@ initIntroVideo() {
     }
 
     // ---------- KILÉPÉS ----------
-    async exitApplication() {
-        // 1. Pontok mentése
-        await this.modules.points.savePoints(
-            this.state.userCode,
-            this.state.totalPoints,
-           this.state.gameScores
-        );
+async exitApplication() {
+    // 1. Mentsük el a kódszámot egy ideiglenes változóba
+    const userCode = this.state.userCode;
+    
+    // 2. Pontok mentése
+    await this.modules.points.savePoints(
+        userCode,
+        this.state.sessionPoints,
+        this.state.gameScores
+    );
 
-        // 2. ÁLLÍTSD VISSZA A PONTOKAT 0-RA (AZ ÚJ JÁTÉKHOZ)
-        this.state.totalPoints = 0;
-        this.state.sessionPoints = 0;
-        this.state.gameScores = [0, 0, 0, 0];
-        this.state.isCodeValid = false;
-        this.state.userCode = null;
+    // 3. Pontok nullázása (DE A KÓDSZÁMOT MEGTARTJUK A BÚCSÚZTATÁSHOZ)
+    this.state.totalPoints = 0;
+    this.state.sessionPoints = 0;
+    this.state.gameScores = [0, 0, 0, 0];
+    this.state.isCodeValid = false;
+    // NE NULLÁZZUK MÉG A userCode-ot!
 
-        // 3. Pont gomb frissítése
-        const pointsLabel = document.querySelector('#btn-points .label');
-        if (pointsLabel) {
-            pointsLabel.textContent = '0';
-        }
-
-        // 4. Búcsúzó képernyő megjelenítése
-        await this.showScreen('goodbye', {
-            points: 0  // Itt már 0-t mutatunk, mert újraindul
-        });
-
-        console.log(`👋 Kilépés: ${this.state.userCode} | Pontok nullázva`);
+    // 4. Pont gomb frissítése
+    const pointsLabel = document.querySelector('#btn-points .label');
+    if (pointsLabel) {
+        pointsLabel.textContent = '0';
     }
+
+    // 5. Búcsúzó képernyő (MÉG A KÓDSZÁMMAL)
+    await this.showScreen('goodbye', {
+        points: this.state.sessionPoints,  // itt még 0
+        code: userCode                     // ← átadjuk a kódszámot
+    });
+
+    // 6. MOST NULLÁZZUK A KÓDSZÁMOT (A BÚCSÚZTATÁS UTÁN)
+    this.state.userCode = null;
+
+    console.log(`👋 Kilépés: ${userCode} | Pontok nullázva`);
+}
+
     // ---------- JÁTÉK INDÍTÁS ----------
     startGame(gameId) {
         const game = this.state.games.find(g => g.id === gameId);
@@ -663,28 +667,24 @@ initIntroVideo() {
     }
 
     // ---------- JÁTÉK BEFEJEZÉS ----------
-    finishGame(points) {
-        // Pontok hozzáadása
-        const gameId = this.state.currentGame;
-        const multiplier = this.state.games.find(g => g.id === gameId)?.multiplier || 1;
-        const finalPoints = points * multiplier;
-        
-        this.state.totalPoints += finalPoints;
-        this.state.gameScores[gameId - 1] = finalPoints;
-        this.state.sessionPoints += finalPoints;
+finishGame(points) {
+    const gameId = this.state.currentGame;
+    const multiplier = this.state.games.find(g => g.id === gameId)?.multiplier || 1;
+    const finalPoints = points * multiplier;
+    
+    // CSAK A JÁTÉKMENET PONTOKAT TÁROLJUK, NEM KUMULÁLUNK!
+    this.state.sessionPoints += finalPoints;
+    this.state.gameScores[gameId - 1] = finalPoints;
 
-        // Pont gomb frissítése
-        const pointsLabel = document.querySelector('#btn-points .label');
-        if (pointsLabel) {
-            pointsLabel.textContent = this.state.totalPoints.toString();
-        }
-
-        // Hang lejátszás
-        this.modules.sound.playWin();
-
-        console.log(`🎮 Játék ${gameId} befejezve: ${finalPoints} pont (${points} × ${multiplier})`);
-
-        // Vissza a menübe
-        this.showScreen('menu');
+    // Pont gomb frissítése – a SESSION PONTOKAT mutassuk
+    const pointsLabel = document.querySelector('#btn-points .label');
+    if (pointsLabel) {
+        pointsLabel.textContent = this.state.sessionPoints.toString();
     }
+
+    this.modules.sound.playWin();
+
+    console.log(`🎮 Játék ${gameId} befejezve: ${finalPoints} pont (${points} × ${multiplier})`);
+
+    this.showScreen('menu');
 }
