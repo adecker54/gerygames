@@ -31,7 +31,7 @@ export class App {
             game: document.getElementById('screen-game'),
             goodbye: document.getElementById('screen-goodbye'),
             admin: document.getElementById('screen-admin'),
-            admin: document.getElementById('screen-links')
+            links: document.getElementById('screen-links')
         };
 
         // Admin ellenőrzés (URL paraméter)
@@ -285,8 +285,8 @@ async showScreen(screenName, data = null) {
     }
 
     setupAdminScreen() {
-        // Admin képernyőt az AdminManager kezeli
-        const screen = this.screens.goodbye;
+        // Admin képernyőt az AdminManager kezeli           itt volt az admin helyett goodbye
+        const screen = this.screens.admin;
         if (!screen) return;
 
         // ---- VISSZA A KEZDŐKÉPERNYŐRE GOMB ----
@@ -687,4 +687,5 @@ finishGame(points) {
     console.log(`🎮 Játék ${gameId} befejezve: ${finalPoints} pont (${points} × ${multiplier})`);
 
     this.showScreen('menu');
+}
 }
