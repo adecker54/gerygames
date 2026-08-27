@@ -233,14 +233,28 @@ async showScreen(screenName, data = null) {
         // ---- LINK GOMBOK ----
         const linkBtns = screen.querySelectorAll('.link-btn');
         linkBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
+            // NE legyen automatikus aktiválás!
+            btn.addEventListener('click', (event) => {
+                // Csak akkor jelöljük látogatottnak, ha a felhasználó tényleg rákattint
+                // és NE engedjük, hogy a böngésző azonnal tovább navigáljon
+                event.preventDefault(); // Megakadályozza az azonnali navigációt
+            
+                // Hang lejátszás
+                this.modules.sound.playClick();
+    
+                // Látogatott állapot beállítása
                 btn.classList.add('visited');
                 const status = btn.querySelector('.link-status');
                 if (status) {
                     status.textContent = '✅';
                 }
-                this.modules.sound.playClick();
-            });
+            
+                // URL megnyitása új ablakban (a felhasználó kattintása után)
+                const url = btn.getAttribute('href');
+                if (url) {
+                    window.open(url, '_blank');
+                }
+        });
     });
 
     // ---- VISSZA GOMB ----
@@ -299,16 +313,23 @@ async showScreen(screenName, data = null) {
         // ---- LINK GOMBOK ----
         const linkBtns = screen.querySelectorAll('.link-btn');
         linkBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                // "Látogatott" állapot beállítása
-                btn.classList.add('visited');
-                const status = btn.querySelector('.link-status');
-                if (status) {
-                    status.textContent = '✅';
-                }
-                // Hang
-                this.modules.sound.playClick();
-            });
+        btn.addEventListener('click', () => {
+            // Hang
+            this.modules.sound.playClick();
+            
+            // Látogatott állapot
+            btn.classList.add('visited');
+            const status = btn.querySelector('.link-status');
+            if (status) {
+                status.textContent = '✅';
+            }
+            
+            // URL megnyitása
+            const url = btn.getAttribute('data-link');
+            if (url) {
+                window.open(url, '_blank');
+            }
+        });
         });
 
         // ---- VISSZA GOMB ----
@@ -316,7 +337,7 @@ async showScreen(screenName, data = null) {
         if (backBtn) {
             backBtn.addEventListener('click', () => {
                 this.modules.sound.playClick();
-                this.showScreen('menu');
+                this.showScreen('goodbye');
             });
         }
     }
