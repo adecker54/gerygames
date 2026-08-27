@@ -226,14 +226,41 @@ async showScreen(screenName, data = null) {
         }
     }
 
+    setupLinksScreen() {
+        const screen = this.screens.links;
+        if (!screen) return;
+
+        // ---- LINK GOMBOK ----
+        const linkBtns = screen.querySelectorAll('.link-btn');
+        linkBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.classList.add('visited');
+                const status = btn.querySelector('.link-status');
+                if (status) {
+                    status.textContent = '✅';
+                }
+                this.modules.sound.playClick();
+            });
+    });
+
+    // ---- VISSZA GOMB ----
+    const backBtn = document.getElementById('back-from-links-btn');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            this.modules.sound.playClick();
+            this.showScreen('goodbye');
+        });
+    }
+}
+
     setupGoodbyeScreen() {
         const screen = this.screens.goodbye;
         if (!screen) return;
 
         // ---- VISSZA A KEZDŐKÉPERNYŐRE GOMB ----
             const backBtn = document.getElementById('back-to-start-btn');
-        if (backBtn) {
-            backBtn.addEventListener('click', () => {
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
                 this.modules.sound.playClick();
             
                 // Pontok nullázása
@@ -253,6 +280,16 @@ async showScreen(screenName, data = null) {
                 this.showScreen('intro');
             });
         }
+        // ---- SZAVAZÁS GOMB (linkek képernyő megnyitása) ----
+        const voteBtn = document.getElementById('vote-btn');
+        if (voteBtn) {
+            voteBtn.addEventListener('click', () => {
+                this.modules.sound.playClick();
+                this.showScreen('links');
+            });
+        }
+
+
     }
 
     setupLinksScreen() {
