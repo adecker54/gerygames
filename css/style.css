@@ -886,6 +886,7 @@ body {
     justify-content: center;
     align-items: center;
     padding: 20px;
+    overflow-y: auto; /* GÖRGETÉS ENGEDÉLYEZÉSE */
 }
 
 .links-container {
@@ -894,6 +895,8 @@ body {
     padding: 30px 24px;
     max-width: 420px;
     width: 100%;
+    max-height: 80vh; /* MAXIMÁLIS MAGASSÁG (a képernyő 80%-a) */
+    overflow-y: auto; /* BELSŐ GÖRGETÉS, HA KELL */
     box-shadow: var(--shadow);
     text-align: center;
 }
@@ -920,6 +923,24 @@ body {
     flex-direction: column;
     gap: 10px;
     margin: 16px 0 24px 0;
+    max-height: 50vh; /* MAXIMÁLIS MAGASSÁG A LISTÁNAK */
+    overflow-y: auto; /* GÖRGETÉS A LISTÁBAN, HA KELL */
+    padding-right: 4px; /* HOGY NE CSÚSSZON A GOMB A GÖRGETŐSÁV ALÁ */
+}
+
+/* GÖRGETŐSÁV STÍLUS (OPCIONÁLIS, SZÉPÍTÉS) */
+.links-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.links-list::-webkit-scrollbar-track {
+    background: var(--gray-pale);
+    border-radius: 10px;
+}
+
+.links-list::-webkit-scrollbar-thumb {
+    background: var(--brown-medium);
+    border-radius: 10px;
 }
 
 .link-btn {
