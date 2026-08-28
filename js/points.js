@@ -331,7 +331,7 @@ showRanking() {
     
     // Aktuális játékos keresése
     const currentCode = window.GeryApp?.state?.userCode;
-    const currentSessionPoints = window.GeryApp?.state?.totalPoints || 0;
+    const currentSessionPoints = window.GeryApp?.state?.sessionPoints || 0;
     
     let currentRecord = null;
     let currentInTop10 = false;
@@ -349,6 +349,13 @@ showRanking() {
                 timestamp: existingRecord.timestamp || '-'
             };
         } else if (currentSessionPoints > 0) {
+            // Ha nincs mentett rekord, de van session pont
+            currentRecord = {
+                code: currentCode,
+                points: maxPoints,
+                timestamp: existingRecord.timestamp || '-'
+            };
+            } else if (currentSessionPoints > 0) {
             // Ha nincs mentett rekord, de van session pont
             currentRecord = {
                 code: currentCode,
