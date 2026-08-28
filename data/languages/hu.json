@@ -6,7 +6,7 @@
     "continue_btn": "Tovább",
     "invalid_code": "Nem jó a kódszám",
     "help_title": "Súgó",
-    "help_text": "<strong>📖 Üdvözlünk a játékban!</strong><br><br>Ez a Web3 játékkeretrendszer lehetővé teszi, hogy <span style='color:#8B6B4F;font-weight:700;'>támogasd Geryt</span>, a hegyi macskát.<br><br>🎯 <strong>Hogyan működik?</strong><br>1. Kattints a <red>Támogatom Geryt, a hegyi macskát<red> gombra<br>2. Add meg a kódszámodat<br>3. Válassz egy játékot<br>4. Gyűjts minél több pontot!<br><br>Emelt pontszám jár a játékok befejezése után Geryre szavazóknak<br><br>📌 <em>Minden játéknak más a szorzója!</em><br><br>A listavezető előléptetést kap a Gery rangrendszerben.<br><br>🐱 <strong>Jó szórakozást!</strong>",
+    "help_text": "<strong>📖 Üdvözlünk a játékban!</strong><br><br>Ez a Web3 játékkeretrendszer lehetővé teszi, hogy <span style='color:#F00;font-weight:700;'>támogasd Geryt</span>, a hegyi macskát.<br><br>🎯 <strong>Hogyan működik?</strong><br>1. Kattints a <span style='color:#8B6B4F;font-weight:700;'>Támogatom Geryt, a hegyi macskát</span> gombra<br>2. Add meg a kódszámodat<br>3. Válassz egy játékot<br>4. Gyűjts minél több pontot!<br>5. A játékokat a |-ra kattintva tudod befejezni.<br><span style='color:#F00;font-weight:700;'>Emelt pontszám</span> jár a játékok befejezése után Geryre szavazóknak<br><br>📌 <em>Minden játéknak más a szorzója!</em><br><br>A listavezető előléptetést kap a Gery rangrendszerben.<br><br>🐱 <strong>Jó szórakozást!</strong>",
     "help_close": "Kilépés",    
     "language_hu": "Magyar",
     "language_en": "Angol",
