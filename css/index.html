@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#8B6B4F" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' 'unsafe-inline' data:; worker-src 'self' blob:;">
+
+    <title>Gery hegyimacska játékai</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" href="favicon.ico" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <!-- ============================================================ -->
+    <!-- FŐ ALKALMAZÁS TÁROLÓ                                         -->
+    <!-- ============================================================ -->
+    <div id="app">
+        <!-- A képernyőket a JavaScript fogja dinamikusan betölteni. ez volt a terv,de mégsem történik meg. Következik a javítás. -->
+        <!-- ============================================================ -->
+        <!-- NYITÓ KÉPERNYŐ                                                -->
+        <!-- ============================================================ -->
+        <div id="screen-intro" class="screen">
+            <video class="background-video" muted playsinline>
+                <source src="assets/video/intro.mp4" type="video/mp4">
+            </video>
+            <img class="background-image" src="assets/images/background.jpg" alt="Háttér" style="display:none;">
+            <div class="overlay"></div>
+            <div class="content">
+                <button class="support-btn" data-i18n="support_btn">Támogatom Geryt, a hegyi macskát</button>
+                <div class="code-row">
+                    <input class="code-input" type="text" maxlength="6" placeholder="Kódszám" disabled>
+                    <button class="continue-btn" data-i18n="continue_btn">Tovább</button>
+                </div>
+                <div class="error-msg"></div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- JÁTÉK MENÜ                                                    -->
+        <!-- ============================================================ -->
+        <div id="screen-menu" class="screen">
+            <div class="menu-title" data-i18n="menu_title">Játszva támogatom Geryt, a hegyi macskát</div>
+            <div class="games-grid">
+                <!-- A játékokat a JavaScript tölti be dinamikusan -->
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- JÁTÉK KÉPERNYŐ                                                -->
+        <!-- ============================================================ -->
+        <div id="screen-game" class="screen">
+            <div class="game-container">
+                <div class="game-header">
+                    <div class="game-title">Játék</div>
+                    <div class="game-multiplier-display">Szorzó: <span>×1</span></div>
+                    <button class="game-exit-btn" style="background:transparent;border:none;font-size:1.5rem;cursor:pointer;color:#c0392b;">⬆</button>
+                </div>
+                <div class="game-content">
+                    <div class="placeholder-text">🎮 Játék betöltése...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- BÚCSÚZÓ KÉPERNYŐ                                              -->
+        <!-- ============================================================ -->
+<div id="screen-goodbye" class="screen">
+    <img class="goodbye-image" src="assets/images/goodbye.jpg" alt="Viszlát!">
+    <div class="overlay"></div>
+    <div class="content">
+        <h2 data-i18n="goodbye_title">Viszlát!</h2>
+        <p data-i18n="goodbye_points">Összegyűjtött pontjaid:</p>
+        <div class="points-display">0</div>
+        <p data-i18n="goodbye_code">Kódszámod:</p>
+        <div class="code-display">----</div>
+        <p class="date-display"></p>
+        <p style="margin-top:16px;font-size:0.9rem;opacity:0.7;" data-i18n="goodbye_thanks">Köszönjük, hogy játszottál!</p>
+        
+        <!-- TELEGRAM GOMB -->
+        <a href="https://t.me/+Cf-CVVEoRiI4ODY0" target="_blank" id="telegram-btn" style="
+            display: inline-block;
+            margin-top: 20px;
+            padding: 16px 32px;
+            background: linear-gradient(145deg, #0088cc, #006699);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,136,204,0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            cursor: pointer; 
+        "
+        onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 8px 30px rgba(0,136,204,0.6)'"
+        onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(0,136,204,0.4)'"
+        data-i18n="telegram_btn">
+            📱 Csatlakozz Gery-hez a Telegramon!
+        </a>
+        <!-- SZAVAZÁS GOMB (a linkes képernyőt nyitja meg) -->
+        <button id="vote-btn" style="
+            display: inline-block;
+            margin-top: 12px;
+            padding: 14px 28px;
+            background: linear-gradient(145deg, #27ae60, #1e8449);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(39,174,96,0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+        "
+        onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 8px 30px rgba(39,174,96,0.6)'"
+        onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(39,174,96,0.4)'"
+        data-i18n="vote_btn">
+            🗳️ Támogasd Gery-t a szavazatoddal is!
+        </button>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- LINKEK / INFORMÁCIÓS KÉPERNYŐ                                -->
+<!-- ============================================================ -->
+<div id="screen-links" class="screen">
+    <div class="links-container" style="max-height: 85vh; overflow-y: auto;">
+        <h2 data-i18n="links_title">🌐 Szavazz Gery sikerére!</h2>
+        <p data-i18n="links_intro">Kattints egymás után az alábbi linkekre, majd segíts a szavazatoddal Gery-nek!</p>
+        <p data-i18n="links_sub">Ezzel a célunk, hogy minél többen ismerjék meg Gery-t, a mi hegyi macskánkat. Minden szavazat számít. A szavazógomb általában a jobb oldalon lefelé görgetve érhető el.</p>
+        <div class="links-list" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"> 
+
+            <a href="https://www.dextools.io/app/token/gerythemountaincat/" target="_blank" rel="noopener noreferrer" class="link-btn">
+                <span class="link-icon">🔗</span>
+                <span class="link-text">Dextools</span>
+                <span class="link-status">⬜</span>
+            </a>
+
+            <a href="https://www.freshcoins.io/coins/gery-the-mountain-cat/" target="_blank" rel="noopener noreferrer" class="link-btn">
+                <span class="link-icon">🪙</span>
+                <span class="link-text">Freshcoins</span>
+                <span class="link-status">⬜</span>
+            </a>
+
+            <a href="https://dexscreener.com/bsc/0x6943f0c3aee6d7f7b3cfa7213ce3b59d37f58920/" target="_blank" rel="noopener noreferrer" class="link-btn">
+                <span class="link-icon">📱</span>
+                <span class="link-text">Dexscreener/Pancakeswap</span>
+                <span class="link-status">⬜</span>
+            </a>
+
+            <a href="https://dexscreener.com/bsc/0x1da24ef040e3aefc5c576eddad71f4a1a9c7bef7/" target="_blank" rel="noopener noreferrer" class="link-btn">
+                <span class="link-icon">🌐</span>
+                <span class="link-text">Dexscreener/Uniswap</span>
+                <span class="link-status">⬜</span>
+            </a>
+
+            <a href="https://top100token.com/binance/0x4b3e294b9ab663c7c3d3fe0a607edacba1286b47/" target="_blank" rel="noopener noreferrer" class="link-btn">
+                <span class="link-icon">🐙</span>
+                <span class="link-text">Top100token</span>
+                <span class="link-status">⬜</span>
+            </a>
+
+            <a href="https://www.coincatapult.com/coin/gery-0x4b3e/" target="_blank" rel="noopener noreferrer" class="link-btn">
+                <span class="link-icon">🔐</span>
+                <span class="link-text">Coincatapult</span>
+                <span class="link-status">⬜</span>
+            </a>
+
+        </div>
+
+        <button id="back-from-links-btn" class="back-btn" data-i18n="back_to_game">
+            🔄 Vissza a játékhoz
+        </button>
+
+    </div>
+</div>
+
+    <!-- ============================================================ -->
+    <!-- FIX 5 GOMB (minden képernyőn)                                 -->
+    <!-- ============================================================ -->
+    <div class="fixed-buttons">
+        <button id="btn-help" class="fixed-btn" title="Súgó">
+            <span class="icon">❓</span>
+            <span class="label" data-i18n="help_title">Help</span>
+        </button>
+        <button id="btn-lang" class="fixed-btn" title="Nyelv váltás">
+            <span class="icon">🇭🇺</span>
+            <span class="label">Magyar</span>
+        </button>
+        <button id="btn-sound" class="fixed-btn" title="Hang ki/be">
+            <span class="icon">🔊</span>
+            <span class="label" data-i18n="sound_on">Hang be</span>
+        </button>
+        <button id="btn-points" class="fixed-btn" title="Pontok">
+            <span class="icon">🏆</span>
+            <span class="label">0</span>
+        </button>
+        <button id="btn-exit" class="fixed-btn" title="Kilépés">
+            <span class="icon">⬆</span>
+            <span class="label" data-i18n="exit_confirm">Kilépés</span>
+        </button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- HANGOK (rejtett audio elemek)                                 -->
+    <!-- ============================================================ -->
+    <div id="sound-container" style="display:none;">
+        <audio id="sound-click" src="assets/sounds/click.mp3" preload="auto"></audio>
+        <audio id="sound-win" src="assets/sounds/win.mp3" preload="auto"></audio>
+        <audio id="sound-error" src="assets/sounds/error.mp3" preload="auto"></audio>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT MODULOK                                           -->
+    <!-- ============================================================ -->
+    <script type="module">
+        // ---- Modulok betöltése ----
+        import { App } from './js/app.js';
+        import { LanguageManager } from './js/language.js';
+        import { AuthManager } from './js/auth.js';
+        import { PointsManager } from './js/points.js';
+        import { SoundManager } from './js/sound.js';
+        import { GamesManager } from './js/games.js';
+        import { Game1 } from './js/game1.js';
+        import { Game2 } from './js/game2.js';
+        import { Game3 } from './js/game3.js';
+        import { Game4 } from './js/game4.js';
+        import { AdminManager } from './js/admin.js';
+
+        // ---- Globális állapot ----
+        window.GeryApp = {
+            state: {
+                currentScreen: 'intro',     // 'intro' | 'menu' | 'game' | 'goodbye'
+                currentGame: null,          // 1-4
+                language: 'hu',             // 'hu' | 'en' | 'de' | 'ru'
+                soundEnabled: true,
+                userCode: null,             // 6 karakteres kód
+                totalPoints: 0,             // Összesített pontszám (menetben)
+                sessionPoints: 0,           // Adott menetben elért pontok
+                isCodeValid: false,
+                isLoggedIn: false,
+                walletAddress: null,
+                gameScores: [0, 0, 0, 0],   // Az egyes játékokban elért pontok
+                gameMultipliers: [0, 0, 0, 0], // Az egyes játékok szorzói
+                games: [
+                    { id: 1, name: 'Játék 1', image: 'game1.jpg', multiplier: 1, active: false },
+                    { id: 2, name: 'Játék 2', image: 'game2.jpg', multiplier: 1, active: false },
+                    { id: 3, name: 'Játék 3', image: 'game3.jpg', multiplier: 1, active: false },
+                    { id: 4, name: 'Játék 4', image: 'game4.jpg', multiplier: 1, active: false }
+                ],
+                previousPoints: 0,          // Előzőleg mentett pontszám (a CSV-ből)
+                startTime: null,
+                endTime: null,
+                codeList: [],               // Az összes érvényes kód
+                pointsData: [],             // A points.csv tartalma
+                isAdmin: false              // Admin mód aktív?
+            },
+            // A modulok példányai
+            modules: {}
+        };
+
+        // ---- Modulok inicializálása ----
+        try {
+            // Nyelvi rendszer
+            window.GeryApp.modules.language = new LanguageManager();
+            await window.GeryApp.modules.language.init();
+
+            // Pontszám kezelő
+            window.GeryApp.modules.points = new PointsManager();
+            await window.GeryApp.modules.points.init();
+
+            // Hang kezelő
+            window.GeryApp.modules.sound = new SoundManager();
+            window.GeryApp.modules.sound.init();
+
+            // Web3 azonosítás
+            window.GeryApp.modules.auth = new AuthManager();
+            await window.GeryApp.modules.auth.init();
+
+            // Játékok menüje
+            window.GeryApp.modules.games = new GamesManager();
+            await window.GeryApp.modules.games.init();
+
+            // Játékok
+            window.GeryApp.modules.game1 = new Game1();
+            window.GeryApp.modules.game2 = new Game2();
+            window.GeryApp.modules.game3 = new Game3();
+            window.GeryApp.modules.game4 = new Game4();
+
+            // Admin
+            window.GeryApp.modules.admin = new AdminManager();
+            await window.GeryApp.modules.admin.init();
+
+            // ---- Fő alkalmazás indítása ----
+            window.GeryApp.modules.app = new App();
+            await window.GeryApp.modules.app.init();
+
+            console.log('🐱 Gery hegyimacska játékai – Sikeres betöltés!');
+        } catch (error) {
+            console.error('❌ Hiba a betöltés során:', error);
+            document.getElementById('app').innerHTML = `
+                <div style="padding:40px;text-align:center;color:#8B6B4F;">
+                    <h2>❌ Hiba történt a betöltés során</h2>
+                    <p>Kérlek, ellenőrizd a konzolt (F12), vagy töltsd újra az oldalt!</p>
+                    <p style="font-size:12px;color:#999;">${error.message}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
