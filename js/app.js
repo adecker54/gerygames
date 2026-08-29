@@ -411,6 +411,10 @@ export class App {
         const lang = this.modules.language;
         const title = lang?.t('help_title') || 'Súgó';
         const text = lang?.t('help_text') || 'Ez itt az információs ablak';
+        const text = lang?.t('telegram_btn') || 'Ez itt a TG csatlakozás';
+        const text = lang?.t('vote_btn') || 'Ez itt a szavazás';
+        const text = lang?.t('links_intro') || 'Ez itt a linkgyűjtemény';
+        const text = lang?.t('links_sub') || 'Ez itt a link ablak';
         
         const modal = document.createElement('div');
         modal.className = 'help-modal-overlay';
@@ -420,6 +424,10 @@ export class App {
                 <div class="help-icon">❓</div>
                 <h2>${title}</h2>
                 <div class="help-text">${text}</div>
+                <div class="telegram_btn">${text}</div>
+                <div class="vote_btn">${text}</div>
+                <div class="links_intro">${text}</div>
+                <div class="links_sub">${text}</div>
                 <button class="help-close-btn" data-i18n="help_close">Bezárás</button>
             </div>
         `;
