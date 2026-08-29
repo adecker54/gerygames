@@ -472,16 +472,6 @@ export class App {
             }
         }
         
-        // ---- PONT GOMB ----
-        const pointsBtn = document.getElementById('btn-points');
-        if (pointsBtn) {
-            const label = pointsBtn.querySelector('.label');
-            if (label) {
-                const total = this.modules.points?.getCurrentTotal() || 0;
-                label.textContent = total.toString();
-            }
-        }
-        
         // ---- KÓDSZÁM MEZŐ PLACEHOLDER FRISSÍTÉSE ----
         const codeInput = document.querySelector('.code-input');
         if (codeInput) {
@@ -589,7 +579,8 @@ export class App {
         const pointsDisplay = screen.querySelector('.points-display');
         const codeDisplay = screen.querySelector('.code-display');
         const dateDisplay = screen.querySelector('.date-display');
-        
+
+        // data-ból olvassuk ki az értékeket
         if (pointsDisplay) {
             pointsDisplay.textContent = data?.points || 0;
         }
@@ -619,9 +610,11 @@ export class App {
 
     // ---------- KILÉPÉS ----------
     async exitApplication() {
+        // 1. Mentsük el a kódszámot és a session pontokat
         const userCode = this.state.userCode;
         const sessionPoints = this.state.sessionPoints;
-        
+
+        // 2. Pontok mentése
         if (userCode && sessionPoints > 0) {
             await this.modules.points.savePoints(
                 userCode,
@@ -630,6 +623,7 @@ export class App {
             );
         }
 
+        // 3. Pontok nullázása
         this.state.totalPoints = 0;
         this.state.sessionPoints = 0;
         this.state.gameScores = [0, 0, 0, 0];
@@ -640,13 +634,13 @@ export class App {
             pointsLabel.textContent = '0';
         }
 
+        // 4. Búcsúzó képernyő - átadjuk a pontokat
         await this.showScreen('goodbye', {
             points: sessionPoints,
             code: userCode
         });
 
         this.state.userCode = null;
-
         console.log(`👋 Kilépés: ${userCode} | Mentett pontok: ${sessionPoints}`);
     }
 
