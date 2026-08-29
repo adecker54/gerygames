@@ -425,7 +425,7 @@ body {
 /* ---------- JÁTÉK MENÜ ---------- */
 #screen-menu {
     background: var(--gray-bg);
-    padding: 20px 16px 100px 16px;
+    padding: 140px 16px 100px 16px;
     overflow-y: auto;
 }
 
