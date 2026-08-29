@@ -62,67 +62,64 @@ export class App {
         console.log('✅ App inicializálva');
     }
 
-async showScreen(screenName, data = null) {
-    // Kilépés előtti mentés (ha menüből vagy játékból lépünk ki)
-    if (this.currentScreen === 'game' && screenName !== 'game' && screenName !== 'goodbye') {
-        // Itt még nem mentünk, csak ha tényleg kilépés
-    }
-
-    // Összes képernyő elrejtése
-    Object.values(this.screens).forEach(el => {
-        if (el) {
-            el.classList.remove('active', 'fade-in');
-            el.style.display = 'none';
+    async showScreen(screenName, data = null) {
+        // Kilépés előtti mentés (ha menüből vagy játékból lépünk ki)
+        if (this.currentScreen === 'game' && screenName !== 'game' && screenName !== 'goodbye') {
+            // Itt még nem mentünk, csak ha tényleg kilépés
         }
-    });
 
-    // Kiválasztott képernyő megjelenítése
-    const target = this.screens[screenName];
-    if (target) {
-        target.style.display = 'flex';
-        // Kis késleltetés a display változás után
-        await new Promise(r => setTimeout(r, 50));
-        target.classList.add('active', 'fade-in');
-    }
+        // Összes képernyő elrejtése
+        Object.values(this.screens).forEach(el => {
+            if (el) {
+                el.classList.remove('active', 'fade-in');
+                el.style.display = 'none';
+            }
+        });
 
-    this.currentScreen = screenName;
-    this.state.currentScreen = screenName;
+        // Kiválasztott képernyő megjelenítése
+        const target = this.screens[screenName];
+        if (target) {
+            target.style.display = 'flex';
+            // Kis késleltetés a display változás után
+            await new Promise(r => setTimeout(r, 50));
+            target.classList.add('active', 'fade-in');
+        }
 
-    // Képernyő specifikus inicializálás
-    if (screenName === 'intro') {
-        // Pontok nullázása, ha nem a kilépés után jöttünk ide, de a pontszámot megtartjuk a kilépés után is
- //     if (this.currentScreen !== 'goodbye') {
+        this.currentScreen = screenName;
+        this.state.currentScreen = screenName;
+
+        // Képernyő specifikus inicializálás
+        if (screenName === 'intro') {
             this.state.totalPoints = 0;
             this.state.sessionPoints = 0;
             this.state.gameScores = [0, 0, 0, 0];
             this.state.isCodeValid = false;
             this.state.userCode = null;
-        //}
+
             const pointsLabel = document.querySelector('#btn-points .label');
             if (pointsLabel) {
                 pointsLabel.textContent = '0';
             }
+            this.initIntroVideo();
+        } else if (screenName === 'menu') {
+            this.modules.games.renderMenu();
+        } else if (screenName === 'goodbye') {
+            this.initGoodbyeScreen(data);
+        } else if (screenName === 'admin') {
+            if (this.state.isAdmin) {
+                this.modules.admin.render();
+            } else {
+                // Ha nem admin, vissza a főképernyőre
+                this.showScreen('intro');
+            }
         }
-        this.initIntroVideo();
-    } else if (screenName === 'menu') {
-        this.modules.games.renderMenu();
-    } else if (screenName === 'goodbye') {
-        this.initGoodbyeScreen(data);
-    } else if (screenName === 'admin') {
-        if (this.state.isAdmin) {
-            this.modules.admin.render();
-        } else {
-            // Ha nem admin, vissza a főképernyőre
-            this.showScreen('intro');
-        }
+
+        // Nyelvi frissítés
+        this.updateScreenTexts();
+        this.modules.language.applyToDOM();
+
+        console.log(`📱 Képernyő váltás: ${screenName}`);
     }
-
-    // Nyelvi frissítés
-    this.updateScreenTexts();
-    this.modules.language.applyToDOM();
-
-    console.log(`📱 Képernyő váltás: ${screenName}`);
-}
 
     // ---------- KÉPERNYŐK BEÁLLÍTÁSA ----------
     setupIntroScreen() {
@@ -233,10 +230,7 @@ async showScreen(screenName, data = null) {
         // ---- LINK GOMBOK ----
         const linkBtns = screen.querySelectorAll('.link-btn');
         linkBtns.forEach(btn => {
-            // NE legyen automatikus aktiválás!
             btn.addEventListener('click', (event) => {
-                // Csak akkor jelöljük látogatottnak, ha a felhasználó tényleg rákattint
-                // és NE engedjük, hogy a böngésző azonnal tovább navigáljon
                 event.preventDefault(); // Megakadályozza az azonnali navigációt
             
                 // Hang lejátszás
@@ -250,31 +244,31 @@ async showScreen(screenName, data = null) {
                 }
             
                 // URL megnyitása új ablakban (a felhasználó kattintása után)
-                const url = btn.getAttribute('href');
+                const url = btn.getAttribute('href') || btn.getAttribute('data-link');
                 if (url) {
                     window.open(url, '_blank');
                 }
+            });
         });
-    });
 
-    // ---- VISSZA GOMB ----
-    const backBtn = document.getElementById('back-from-links-btn');
-    if (backBtn) {
-        backBtn.addEventListener('click', () => {
-            this.modules.sound.playClick();
-            this.showScreen('goodbye');
-        });
+        // ---- VISSZA GOMB ----
+        const backBtn = document.getElementById('back-from-links-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                this.modules.sound.playClick();
+                this.showScreen('goodbye');
+            });
+        }
     }
-}
 
     setupGoodbyeScreen() {
         const screen = this.screens.goodbye;
         if (!screen) return;
 
         // ---- VISSZA A KEZDŐKÉPERNYŐRE GOMB ----
-            const backBtn = document.getElementById('back-to-start-btn');
-            if (backBtn) {
-                backBtn.addEventListener('click', () => {
+        const backBtn = document.getElementById('back-to-start-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
                 this.modules.sound.playClick();
             
                 // Pontok nullázása
@@ -294,6 +288,7 @@ async showScreen(screenName, data = null) {
                 this.showScreen('intro');
             });
         }
+        
         // ---- SZAVAZÁS GOMB (linkek képernyő megnyitása) ----
         const voteBtn = document.getElementById('vote-btn');
         if (voteBtn) {
@@ -302,48 +297,9 @@ async showScreen(screenName, data = null) {
                 this.showScreen('links');
             });
         }
-
-
-    }
-
-    setupLinksScreen() {
-        const screen = this.screens.links;
-        if (!screen) return;
-
-        // ---- LINK GOMBOK ----
-        const linkBtns = screen.querySelectorAll('.link-btn');
-        linkBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Hang
-            this.modules.sound.playClick();
-            
-            // Látogatott állapot
-            btn.classList.add('visited');
-            const status = btn.querySelector('.link-status');
-            if (status) {
-                status.textContent = '✅';
-            }
-            
-            // URL megnyitása
-            const url = btn.getAttribute('data-link');
-            if (url) {
-                window.open(url, '_blank');
-            }
-        });
-        });
-
-        // ---- VISSZA GOMB ----
-        const backBtn = document.getElementById('back-from-links-btn');
-        if (backBtn) {
-            backBtn.addEventListener('click', () => {
-                this.modules.sound.playClick();
-                this.showScreen('goodbye');
-            });
-        }
     }
 
     setupAdminScreen() {
-        // Admin képernyőt az AdminManager kezeli           itt volt az admin helyett goodbye
         const screen = this.screens.admin;
         if (!screen) return;
 
@@ -375,8 +331,8 @@ async showScreen(screenName, data = null) {
     setupFixedButtons() {
         // Help
         document.getElementById('btn-help')?.addEventListener('click', () => {
-        this.modules.sound.playClick();
-        this.showHelpModal();
+            this.modules.sound.playClick();
+            this.showHelpModal();
         });
 
         // Nyelv váltás
@@ -420,8 +376,8 @@ async showScreen(screenName, data = null) {
 
         // Linkek / Szavazáshoz
         document.getElementById('show-links-btn')?.addEventListener('click', () => {
-        this.modules.sound.playClick();
-        this.showScreen('links');
+            this.modules.sound.playClick();
+            this.showScreen('links');
         });
 
         // Kilépés
@@ -437,7 +393,7 @@ async showScreen(screenName, data = null) {
 
     updateLanguageButton() {
         const btn = document.getElementById('btn-lang');
-        if (!btn) return;  // ← EZT ADD HOZZÁ AZ ELEJÉRE!
+        if (!btn) return;
     
         const current = this.modules.language.getLanguage();
         const label = btn.querySelector('.label');
@@ -451,214 +407,205 @@ async showScreen(screenName, data = null) {
         }
     }
 
-showHelpModal() {
-    const lang = this.modules.language;
-    const title = lang?.t('help_title') || 'Súgó';
-    const text = lang?.t('help_text') || 'Ez itt az információs ablak';
-    
-    const modal = document.createElement('div');
-    modal.className = 'help-modal-overlay';
-    modal.id = 'help-modal';
-    modal.innerHTML = `
-        <div class="help-modal-box">
-            <div class="help-icon">❓</div>
-            <h2>${title}</h2>
-            <div class="help-text">${text}</div>
-            <button class="help-close-btn" data-i18n="help_close">Bezárás</button>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Bezárás
-    const closeBtn = modal.querySelector('.help-close-btn');
-    closeBtn.addEventListener('click', () => modal.remove());
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.remove();
-    });
-}
+    showHelpModal() {
+        const lang = this.modules.language;
+        const title = lang?.t('help_title') || 'Súgó';
+        const text = lang?.t('help_text') || 'Ez itt az információs ablak';
+        
+        const modal = document.createElement('div');
+        modal.className = 'help-modal-overlay';
+        modal.id = 'help-modal';
+        modal.innerHTML = `
+            <div class="help-modal-box">
+                <div class="help-icon">❓</div>
+                <h2>${title}</h2>
+                <div class="help-text">${text}</div>
+                <button class="help-close-btn" data-i18n="help_close">Bezárás</button>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Bezárás
+        const closeBtn = modal.querySelector('.help-close-btn');
+        closeBtn.addEventListener('click', () => modal.remove());
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
 
-updateScreenTexts() {
-    // Nyelvi szövegek frissítése
-    if (this.modules.language) {
-        this.modules.language.applyToDOM();
-    }
-    
-    const lang = this.modules.language?.getLanguage() || 'hu';
-    const langNames = { hu: 'Magyar', en: 'English', de: 'Deutsch', ru: 'Русский' };
-    const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', ru: '🇷🇺' };
-    
-    // ---- NYELV GOMB ----
-    const langBtn = document.getElementById('btn-lang');
-    if (langBtn) {
-        const label = langBtn.querySelector('.label');
-        if (label) {
-            label.textContent = langNames[lang] || lang;
+    updateScreenTexts() {
+        // Nyelvi szövegek frissítése
+        if (this.modules.language) {
+            this.modules.language.applyToDOM();
         }
-        const icon = langBtn.querySelector('.icon');
-        if (icon) {
-            icon.textContent = flags[lang] || '🌐';
+        
+        const lang = this.modules.language?.getLanguage() || 'hu';
+        const langNames = { hu: 'Magyar', en: 'English', de: 'Deutsch', ru: 'Русский' };
+        const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', ru: '🇷🇺' };
+        
+        // ---- NYELV GOMB ----
+        const langBtn = document.getElementById('btn-lang');
+        if (langBtn) {
+            const label = langBtn.querySelector('.label');
+            if (label) {
+                label.textContent = langNames[lang] || lang;
+            }
+            const icon = langBtn.querySelector('.icon');
+            if (icon) {
+                icon.textContent = flags[lang] || '🌐';
+            }
+        }
+        
+        // ---- HANG GOMB ----
+        const soundBtn = document.getElementById('btn-sound');
+        if (soundBtn) {
+            const label = soundBtn.querySelector('.label');
+            if (label) {
+                label.textContent = this.state.soundEnabled ? 
+                    (this.modules.language?.t('sound_on') || 'Hang be') : 
+                    (this.modules.language?.t('sound_off') || 'Hang ki');
+            }
+            const icon = soundBtn.querySelector('.icon');
+            if (icon) {
+                icon.textContent = this.state.soundEnabled ? '🔊' : '🔇';
+            }
+        }
+        
+        // ---- PONT GOMB ----
+        const pointsBtn = document.getElementById('btn-points');
+        if (pointsBtn) {
+            const label = pointsBtn.querySelector('.label');
+            if (label) {
+                const total = this.modules.points?.getCurrentTotal() || 0;
+                label.textContent = total.toString();
+            }
+        }
+        
+        // ---- KÓDSZÁM MEZŐ PLACEHOLDER FRISSÍTÉSE ----
+        const codeInput = document.querySelector('.code-input');
+        if (codeInput) {
+            codeInput.placeholder = this.modules.language?.t('enter_code') || 'Add meg a kódszámodat';
+        }
+        
+        // ---- HIBAÜZENET FRISSÍTÉSE (ha látható) ----
+        const errorMsg = document.querySelector('.error-msg');
+        if (errorMsg && errorMsg.textContent.trim() !== '') {
+            errorMsg.textContent = this.modules.language?.t('invalid_code') || 'Nem jó a kódszám';
         }
     }
-    
-    // ---- HANG GOMB ----
-    const soundBtn = document.getElementById('btn-sound');
-    if (soundBtn) {
-        const label = soundBtn.querySelector('.label');
-        if (label) {
-            label.textContent = this.state.soundEnabled ? 
-                (this.modules.language?.t('sound_on') || 'Hang be') : 
-                (this.modules.language?.t('sound_off') || 'Hang ki');
-        }
-        const icon = soundBtn.querySelector('.icon');
-        if (icon) {
-            icon.textContent = this.state.soundEnabled ? '🔊' : '🔇';
-        }
-    }
-    
-    // ---- PONT GOMB ----
-    const pointsBtn = document.getElementById('btn-points');
-    if (pointsBtn) {
-        const label = pointsBtn.querySelector('.label');
-        if (label) {
-            const total = this.modules.points?.getCurrentTotal() || 0;
-            label.textContent = total.toString();
-        }
-    }
-    
-    // ---- KÓDSZÁM MEZŐ PLACEHOLDER FRISSÍTÉSE ----
-    const codeInput = document.querySelector('.code-input');
-    if (codeInput) {
-        codeInput.placeholder = this.modules.language?.t('enter_code') || 'Add meg a kódszámodat';
-    }
-    
-    // ---- HIBAÜZENET FRISSÍTÉSE (ha látható) ----
-    const errorMsg = document.querySelector('.error-msg');
-    if (errorMsg && errorMsg.textContent.trim() !== '') {
-        // Ha hibát mutat, frissítsük a szövegét
-        errorMsg.textContent = this.modules.language?.t('invalid_code') || 'Nem jó a kódszám';
-    }
-}
 
     // ---------- KÓDSZÁM ELLENŐRZÉS ----------
-validateCode(code, input, errorMsg, continueBtn, supportBtn) {
-    const isValid = this.modules.points.validateCode(code);
-    
-    if (isValid) {
-        this.state.userCode = code;
-        this.state.isCodeValid = true;
-        input.classList.remove('error');
-        errorMsg.textContent = '';
-        errorMsg.style.display = 'none';
-        continueBtn.classList.add('visible');
-        supportBtn.classList.remove('active');
-        this.modules.points.loadPointsForCode(code);
-    } else {
-        this.state.isCodeValid = false;
-        input.classList.add('error');
+    validateCode(code, input, errorMsg, continueBtn, supportBtn) {
+        const isValid = this.modules.points.validateCode(code);
         
-        // HIBAÜZENET MEGJELENÍTÉSE - JOBB DESIGN
-        errorMsg.textContent = this.modules.language?.t('invalid_code') || '❌ Nem jó a kódszám!';
-        errorMsg.style.display = 'block';
-        
-        continueBtn.classList.remove('visible');
-        this.modules.sound.playError();
-        
-        // 3 MÁSODPERCIG LÁTHATÓ
-        setTimeout(() => {
+        if (isValid) {
+            this.state.userCode = code;
+            this.state.isCodeValid = true;
             input.classList.remove('error');
             errorMsg.textContent = '';
             errorMsg.style.display = 'none';
-        }, 3000);
+            continueBtn.classList.add('visible');
+            supportBtn.classList.remove('active');
+            this.modules.points.loadPointsForCode(code);
+        } else {
+            this.state.isCodeValid = false;
+            input.classList.add('error');
+            
+            // HIBAÜZENET MEGJELENÍTÉSE - JOBB DESIGN
+            errorMsg.textContent = this.modules.language?.t('invalid_code') || '❌ Nem jó a kódszám!';
+            errorMsg.style.display = 'block';
+            
+            continueBtn.classList.remove('visible');
+            this.modules.sound.playError();
+            
+            // 3 MÁSODPERCIG LÁTHATÓ
+            setTimeout(() => {
+                input.classList.remove('error');
+                errorMsg.textContent = '';
+                errorMsg.style.display = 'none';
+            }, 3000);
+        }
     }
-}
 
     // ---------- VIDEÓ KEZELÉS ----------
-initIntroVideo() {
-    const video = this.videoElement;
-    if (!video) return;
+    initIntroVideo() {
+        const video = this.videoElement;
+        if (!video) return;
 
-    // Videó visszaállítása
-    video.currentTime = 0;
-    video.style.display = 'block';
-    if (this.backgroundImage) {
-        this.backgroundImage.style.display = 'none';
-    }
-    // HANG BEÁLLÍTÁSA
-    video.muted = !this.state.soundEnabled;
+        // Videó visszaállítása
+        video.currentTime = 0;
+        video.style.display = 'block';
+        if (this.backgroundImage) {
+            this.backgroundImage.style.display = 'none';
+        }
+        // HANG BEÁLLÍTÁSA
+        video.muted = !this.state.soundEnabled;
         if (!this.state.soundEnabled) {
             video.volume = 0.5;
         }
 
-    // Első interakcióra indul a videó
-    const playVideo = () => {
-        if (video.paused) {
-            video.play().catch(() => {
-                // Ha nem sikerül, mutassuk a képet
+        // Első interakcióra indul a videó
+        const playVideo = () => {
+            if (video.paused) {
+                video.play().catch(() => {
+                    if (this.backgroundImage) {
+                        video.style.display = 'none';
+                        this.backgroundImage.style.display = 'block';
+                    }
+                });
+            }
+            document.removeEventListener('click', playVideo);
+            document.removeEventListener('touchstart', playVideo);
+        };
+
+        document.addEventListener('click', playVideo);
+        document.addEventListener('touchstart', playVideo);
+
+        setTimeout(() => {
+            if (video.paused) {
+                video.style.display = 'none';
                 if (this.backgroundImage) {
-                    video.style.display = 'none';
                     this.backgroundImage.style.display = 'block';
                 }
-            });
-        }
-        // Eseményfigyelők eltávolítása az első interakció után
-        document.removeEventListener('click', playVideo);
-        document.removeEventListener('touchstart', playVideo);
-    };
+            }
+        }, 10000);
 
-    // Felhasználói interakcióra várunk
-    document.addEventListener('click', playVideo);
-    document.addEventListener('touchstart', playVideo);
-
-    // Ha 10 másodperc után sem történt interakció, mutassuk a képet
-    setTimeout(() => {
-        if (video.paused) {
+        video.removeEventListener('ended', this.videoEndHandler);
+        this.videoEndHandler = () => {
             video.style.display = 'none';
             if (this.backgroundImage) {
                 this.backgroundImage.style.display = 'block';
             }
-        }
-    }, 10000);
-
-    // Videó végén mutassuk a záróképet - nem loop
-    video.removeEventListener('ended', this.videoEndHandler);
-    this.videoEndHandler = () => {
-        video.style.display = 'none';
-        if (this.backgroundImage) {
-            this.backgroundImage.style.display = 'block';
-        }
-    };
-    video.addEventListener('ended', this.videoEndHandler);
-}
+        };
+        video.addEventListener('ended', this.videoEndHandler);
+    }
 
     // ---------- BÚCSÚZÓ KÉPERNYŐ ----------
-initGoodbyeScreen(data) {
-    const screen = this.screens.goodbye;
-    if (!screen) return;
-    
-    const pointsDisplay = screen.querySelector('.points-display');
-    const codeDisplay = screen.querySelector('.code-display');
-    const dateDisplay = screen.querySelector('.date-display');
-    
-    if (pointsDisplay) {
-        // A KILÉPÉSKOR MENTETT PONTOKAT MUTASSUK
-        pointsDisplay.textContent = data?.points || 0;
+    initGoodbyeScreen(data) {
+        const screen = this.screens.goodbye;
+        if (!screen) return;
+        
+        const pointsDisplay = screen.querySelector('.points-display');
+        const codeDisplay = screen.querySelector('.code-display');
+        const dateDisplay = screen.querySelector('.date-display');
+        
+        if (pointsDisplay) {
+            pointsDisplay.textContent = data?.points || 0;
+        }
+        if (codeDisplay) {
+            codeDisplay.textContent = data?.code || '----';
+        }
+        if (dateDisplay) {
+            const now = new Date();
+            const lang = this.modules.language.getLanguage();
+            const dateStr = this.formatDate(now, lang);
+            dateDisplay.textContent = dateStr;
+        }
     }
-    if (codeDisplay) {
-        // HASZNÁLD AZ ÁTADOTT KÓDSZÁMOT, VAGY A STATE-BŐL
-        codeDisplay.textContent = data?.code || '----';
-    }
-    if (dateDisplay) {
-        const now = new Date();
-        const lang = this.modules.language.getLanguage();
-        const dateStr = this.formatDate(now, lang);
-        dateDisplay.textContent = dateStr;
-    }
-}
 
     // ---------- DÁTUM FORMÁZÁS ----------
     formatDate(date, lang) {
-        // Római számok a hónapokhoz (független a nyelvtől)
         const romanMonths = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
     
         const year = date.getFullYear();
@@ -671,56 +618,46 @@ initGoodbyeScreen(data) {
     }
 
     // ---------- KILÉPÉS ----------
-async exitApplication() {
-    // 1. Mentsük el a kódszámot és a session pontokat
-    const userCode = this.state.userCode;
-    const sessionPoints = this.state.sessionPoints;
-    
-    // 2. Pontok mentése (CSAK A SESSION PONTOKAT!)
-    if (userCode && sessionPoints > 0) {
-        await this.modules.points.savePoints(
-            userCode,
-            sessionPoints,
-            this.state.gameScores
-        );
+    async exitApplication() {
+        const userCode = this.state.userCode;
+        const sessionPoints = this.state.sessionPoints;
+        
+        if (userCode && sessionPoints > 0) {
+            await this.modules.points.savePoints(
+                userCode,
+                sessionPoints,
+                this.state.gameScores
+            );
+        }
+
+        this.state.totalPoints = 0;
+        this.state.sessionPoints = 0;
+        this.state.gameScores = [0, 0, 0, 0];
+        this.state.isCodeValid = false;
+
+        const pointsLabel = document.querySelector('#btn-points .label');
+        if (pointsLabel) {
+            pointsLabel.textContent = '0';
+        }
+
+        await this.showScreen('goodbye', {
+            points: sessionPoints,
+            code: userCode
+        });
+
+        this.state.userCode = null;
+
+        console.log(`👋 Kilépés: ${userCode} | Mentett pontok: ${sessionPoints}`);
     }
-
-    // 3. Pontok nullázása
-    this.state.totalPoints = 0;
-    this.state.sessionPoints = 0;
-    this.state.gameScores = [0, 0, 0, 0];
-    this.state.isCodeValid = false;
-
-    // 4. Pont gomb frissítése
-    const pointsLabel = document.querySelector('#btn-points .label');
-    if (pointsLabel) {
-        pointsLabel.textContent = '0';
-    }
-
-    // 5. Búcsúzó képernyő – ÁTADJUK A PONTOKAT ÉS A KÓDSZÁMOT!
-    await this.showScreen('goodbye', {
-        points: sessionPoints,    // ← a játékmenet pontjai
-        code: userCode            // ← a kódszám
-    });
-
-    // 6. Kódszám nullázása (a búcsúztatás után)
-    this.state.userCode = null;
-
-    console.log(`👋 Kilépés: ${userCode} | Mentett pontok: ${sessionPoints}`);
-}
 
     // ---------- JÁTÉK INDÍTÁS ----------
     startGame(gameId) {
         const game = this.state.games.find(g => g.id === gameId);
         if (!game) return;
 
-        // Játék betöltése
         this.state.currentGame = gameId;
-        
-        // Játék képernyő megjelenítése
         this.showScreen('game');
         
-        // Játék specifikus indítás
         const gameModule = this.modules[`game${gameId}`];
         if (gameModule && gameModule.start) {
             gameModule.start(game);
@@ -733,11 +670,9 @@ async exitApplication() {
         const multiplier = this.state.games.find(g => g.id === gameId)?.multiplier || 1;
         const finalPoints = points * multiplier;
     
-        // CSAK A JÁTÉKMENET PONTOKAT TÁROLJUK, NEM KUMULÁLUNK!
         this.state.sessionPoints += finalPoints;
         this.state.gameScores[gameId - 1] = finalPoints;
 
-        // Pont gomb frissítése – a SESSION PONTOKAT mutassuk
         const pointsLabel = document.querySelector('#btn-points .label');
         if (pointsLabel) {
             pointsLabel.textContent = this.state.sessionPoints.toString();
