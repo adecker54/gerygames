@@ -222,7 +222,6 @@ export class App {
             });
         }
     }
-
     setupLinksScreen() {
         const screen = this.screens.links;
         if (!screen) return;
@@ -230,21 +229,14 @@ export class App {
         // ---- LINK GOMBOK ----
         const linkBtns = screen.querySelectorAll('.link-btn');
         linkBtns.forEach(btn => {
-            btn.addEventListener('click', (event) => {
-                event.preventDefault(); // Megakadályozza az azonnali navigációt
-            
-                // Hang lejátszás
+            btn.addEventListener('click', () => {
                 this.modules.sound.playClick();
-    
-                // Látogatott állapot beállítása
                 btn.classList.add('visited');
                 const status = btn.querySelector('.link-status');
                 if (status) {
                     status.textContent = '✅';
                 }
-            
-                // URL megnyitása új ablakban (a felhasználó kattintása után)
-                const url = btn.getAttribute('href') || btn.getAttribute('data-link');
+                const url = btn.getAttribute('data-link');
                 if (url) {
                     window.open(url, '_blank');
                 }
@@ -256,11 +248,15 @@ export class App {
         if (backBtn) {
             backBtn.addEventListener('click', () => {
                 this.modules.sound.playClick();
-                this.showScreen('goodbye');
+            
+                // ★★★ KÖZVETLENÜL A STATE-BŐL OLVASSUK KI AZ ADATOKAT! ★★★
+                const points = this.state.sessionPoints || 0;
+                const code = this.state.userCode || '----';
+            
+                this.showScreen('goodbye', { points: points, code: code });
             });
         }
-    }
-
+}
     setupGoodbyeScreen() {
         const screen = this.screens.goodbye;
         if (!screen) return;
@@ -294,6 +290,11 @@ export class App {
         if (voteBtn) {
             voteBtn.addEventListener('click', () => {
                 this.modules.sound.playClick();
+                // MENTSÜK EL A PONTOKAT ÉS A KÓDSZÁMOT A VISSZATÉRÉSHEZ!
+                this._goodbyeData = {
+                    points: this.state.sessionPoints,
+                    code: this.state.userCode
+                };
                 this.showScreen('links');
             });
         }
