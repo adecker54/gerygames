@@ -426,12 +426,16 @@ export class App {
         
         document.body.appendChild(modal);
         
-        // Bezárás
+        // ★★★ ITT KÉZI FRISSÍTÉS A BIZTONSÁG KEDVÉÉRT ★★★
         const closeBtn = modal.querySelector('.help-close-btn');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 if (closeBtn) {
+        closeBtn.textContent = lang?.t('help_close') || 'Bezárás';
         closeBtn.addEventListener('click', () => modal.remove());
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.remove();
-        });
+    }
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    }); 
     }
 
     updateScreenTexts() {
