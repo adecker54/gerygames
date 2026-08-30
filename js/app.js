@@ -402,7 +402,7 @@ export class App {
         }
         const icon = btn.querySelector('.icon');
         if (icon) {
-            const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', ru: '🇷🇺' };
+            const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', jp: '🇯🇵' ru: '🇷🇺' };
             icon.textContent = flags[current] || '🌐';
         }
     }
@@ -441,8 +441,8 @@ export class App {
         }
         
         const lang = this.modules.language?.getLanguage() || 'hu';
-        const langNames = { hu: 'Magyar', en: 'English', de: 'Deutsch', ru: 'Русский' };
-        const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', ru: '🇷🇺' };
+        const langNames = { hu: 'Magyar', en: 'English', de: 'Deutsch', jp: '日本語', ru: 'Русский' };
+        const flags = { hu: '🇭🇺', en: '🇬🇧', de: '🇩🇪', jp: '🇩🇪JP', ru: '🇷🇺' };
         
         // ---- NYELV GOMB ----
         const langBtn = document.getElementById('btn-lang');

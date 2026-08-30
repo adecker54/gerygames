@@ -12,7 +12,7 @@ export class LanguageManager {
 
     async init() {
         try {
-            const languages = ['hu', 'en', 'de', 'ru'];
+            const languages = ['hu', 'en', 'de', 'jp', 'ru'];
             const loadPromises = languages.map(lang => 
                 fetch(`data/languages/${lang}.json`)
                     .then(res => {
@@ -91,6 +91,7 @@ export class LanguageManager {
             hu: 'Magyar',
             en: 'English',
             de: 'Deutsch',
+            jp: '日本語',
             ru: 'Русский'
         };
         return names[lang] || lang;
