@@ -242,18 +242,18 @@ export class App {
                 }
             });
         });
-
-        // ---- VISSZA GOMB ----
-        const backBtn = document.getElementById('back-from-links-btn');
-        if (backBtn) {
+    // ---- VISSZA GOMB ----
+    const backBtn = document.getElementById('back-from-links-btn');
+    if (backBtn) {
         backBtn.addEventListener('click', () => {
             this.modules.sound.playClick();
+        
             // ★★★ A _goodbyeData-BÓL OLVASSUK KI AZ ADATOKAT! ★★★
             const data = this._goodbyeData || { points: 0, code: '----' };
             this.showScreen('goodbye', data);
         });
     }
-
+}
     setupGoodbyeScreen() {
         const screen = this.screens.goodbye;
         if (!screen) return;
