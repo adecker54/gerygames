@@ -246,17 +246,14 @@ export class App {
         // ---- VISSZA GOMB ----
         const backBtn = document.getElementById('back-from-links-btn');
         if (backBtn) {
-            backBtn.addEventListener('click', () => {
-                this.modules.sound.playClick();
-            
-                // ★★★ KÖZVETLENÜL A STATE-BŐL OLVASSUK KI AZ ADATOKAT! ★★★
-                const points = this.state.sessionPoints || 0;
-                const code = this.state.userCode || '----';
-            
-                this.showScreen('goodbye', { points: points, code: code });
-            });
-        }
-}
+        backBtn.addEventListener('click', () => {
+            this.modules.sound.playClick();
+            // ★★★ A _goodbyeData-BÓL OLVASSUK KI AZ ADATOKAT! ★★★
+            const data = this._goodbyeData || { points: 0, code: '----' };
+            this.showScreen('goodbye', data);
+        });
+    }
+
     setupGoodbyeScreen() {
         const screen = this.screens.goodbye;
         if (!screen) return;
