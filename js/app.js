@@ -248,12 +248,20 @@ export class App {
         backBtn.addEventListener('click', () => {
             this.modules.sound.playClick();
         
-            // ★★★ A _goodbyeData-BÓL OLVASSUK KI AZ ADATOKAT! ★★★
-            const data = this._goodbyeData || { points: 0, code: '----' };
-            this.showScreen('goodbye', data);
+            // ★★★ HA LÉTEZIK A _goodbyeData, AKKOR AZT HASZNÁLJUK, KÜLÖNBEN A STATE-BŐL OLVASUNK ★★★
+            let points, code;
+            if (this._goodbyeData && this._goodbyeData.points !== undefined) {
+                points = this._goodbyeData.points;
+                code = this._goodbyeData.code;
+            } else {
+                points = this.state.sessionPoints || 0;
+                code = this.state.userCode || '----';
+            }
+        
+            this.showScreen('goodbye', { points: points, code: code });
         });
     }
-}
+
     setupGoodbyeScreen() {
         const screen = this.screens.goodbye;
         if (!screen) return;
