@@ -242,10 +242,10 @@ export class App {
                 }
             });
         });
-    // ---- VISSZA GOMB ----
-    const backBtn = document.getElementById('back-from-links-btn');
-    if (backBtn) {
-        backBtn.addEventListener('click', () => {
+    	// ---- VISSZA GOMB ----
+    	const backBtn = document.getElementById('back-from-links-btn');
+    	if (backBtn) {
+            backBtn.addEventListener('click', () => {
             this.modules.sound.playClick();
         
             // ★★★ HA LÉTEZIK A _goodbyeData, AKKOR AZT HASZNÁLJUK, KÜLÖNBEN A STATE-BŐL OLVASUNK ★★★
@@ -261,6 +261,7 @@ export class App {
             this.showScreen('goodbye', { points: points, code: code });
         });
     }
+} // ---- Grok javaslat ----
 
     setupGoodbyeScreen() {
         const screen = this.screens.goodbye;
@@ -434,14 +435,14 @@ export class App {
         
         // ★★★ ITT KÉZI FRISSÍTÉS A BIZTONSÁG KEDVÉÉRT ★★★
         const closeBtn = modal.querySelector('.help-close-btn');
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 if (closeBtn) {
-        closeBtn.textContent = lang?.t('help_close') || 'Bezárás';
-        closeBtn.addEventListener('click', () => modal.remove());
-    }
+        if (closeBtn) {
+            closeBtn.textContent = lang?.t('help_close') || 'Bezárás';
+            closeBtn.addEventListener('click', () => modal.remove());
+        }
     
-    modal.addEventListener('click', (e) => {
+        modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.remove();
-    }); 
+        }); 
     }
 
     updateScreenTexts() {
