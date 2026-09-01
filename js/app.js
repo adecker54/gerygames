@@ -243,25 +243,27 @@ export class App {
             });
         });
     	// ---- VISSZA GOMB ----
-    	const backBtn = document.getElementById('back-from-links-btn');
-    	if (backBtn) {
+        const backBtn = document.getElementById('back-from-links-btn');
+        if (backBtn) {
             backBtn.addEventListener('click', () => {
             this.modules.sound.playClick();
         
-            // ★★★ HA LÉTEZIK A _goodbyeData, AKKOR AZT HASZNÁLJUK, KÜLÖNBEN A STATE-BŐL OLVASUNK ★★★
-            let points, code;
-            if (this._goodbyeData && this._goodbyeData.points !== undefined) {
-                points = this._goodbyeData.points;
-                code = this._goodbyeData.code;
-            } else {
-                points = this.state.sessionPoints || 0;
-                code = this.state.userCode || '----';
-            }
-        
-            this.showScreen('goodbye', { points: points, code: code });
-        });
+                // ★★★ HASZNÁLD A _goodbyeData-T, HA LÉTEZIK! ★★★
+                if (this._goodbyeData) {
+                    this.showScreen('goodbye', {
+                        points: this._goodbyeData.points || 0,
+                        code: this._goodbyeData.code || '----'
+                    });
+                } else {
+                    // BIZTONSÁGI MEGOLDÁS: A STATE-BŐL OLVASUNK
+                    this.showScreen('goodbye', {
+                        points: this.state.sessionPoints || 0,
+                        code: this.state.userCode || '----'
+                    });
+                }
+            });
+        }
     }
-} // ---- Grok javaslat ----
 
     setupGoodbyeScreen() {
         const screen = this.screens.goodbye;
