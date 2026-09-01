@@ -246,21 +246,13 @@ export class App {
         const backBtn = document.getElementById('back-from-links-btn');
         if (backBtn) {
             backBtn.addEventListener('click', () => {
-            this.modules.sound.playClick();
+                this.modules.sound.playClick();
         
-                // ★★★ HASZNÁLD A _goodbyeData-T, HA LÉTEZIK! ★★★
-                if (this._goodbyeData) {
-                    this.showScreen('goodbye', {
-                        points: this._goodbyeData.points || 0,
-                        code: this._goodbyeData.code || '----'
-                    });
-                } else {
-                    // BIZTONSÁGI MEGOLDÁS: A STATE-BŐL OLVASUNK
-                    this.showScreen('goodbye', {
-                        points: this.state.sessionPoints || 0,
-                        code: this.state.userCode || '----'
-                    });
-                }
+                // ★★★ HASZNÁLD A GLOBÁLIS VÁLTOZÓT! ★★★
+                const points = window._goodbyeData?.points || 0;
+                const code = window._goodbyeData?.code || '----';
+        
+                this.showScreen('goodbye', { points: points, code: code });
             });
         }
     }
@@ -593,12 +585,15 @@ export class App {
         const codeDisplay = screen.querySelector('.code-display');
         const dateDisplay = screen.querySelector('.date-display');
 
-        // data-ból olvassuk ki az értékeket
+        // ★★★ HA A data ÜRES, HASZNÁLD A GLOBÁLIS VÁLTOZÓT! ★★★
+        const points = data?.points ?? window._goodbyeData?.points ?? 0;
+        const code = data?.code ?? window._goodbyeData?.code ?? '----';
+
         if (pointsDisplay) {
-            pointsDisplay.textContent = data?.points || 0;
+            pointsDisplay.textContent = points;
         }
         if (codeDisplay) {
-            codeDisplay.textContent = data?.code || '----';
+            codeDisplay.textContent = code;
         }
         if (dateDisplay) {
             const now = new Date();
@@ -636,6 +631,12 @@ export class App {
             );
         }
 
+        // ★★★ MENTSÜK EL AZ ADATOKAT GLOBÁLISAN! ★★★
+        window._goodbyeData = {
+            points: sessionPoints,
+            code: userCode
+        };
+
         // 3. Pontok nullázása
         this.state.totalPoints = 0;
         this.state.sessionPoints = 0;
@@ -652,7 +653,6 @@ export class App {
             points: sessionPoints,
             code: userCode
         });
-
         this.state.userCode = null;
         console.log(`👋 Kilépés: ${userCode} | Mentett pontok: ${sessionPoints}`);
     }
