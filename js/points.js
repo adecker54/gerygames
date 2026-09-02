@@ -333,29 +333,21 @@ showRanking() {
     const currentCode = window.GeryApp?.state?.userCode;
     const currentSessionPoints = window.GeryApp?.state?.sessionPoints || 0;
     
-    // KÉSZÍTSÜK EL AZ AKTUÁLIS REKORDOT (a session pontok alapján)
     let currentRecord = null;
     let currentInTop10 = false;
     
     if (currentCode) {
-        // Ellenőrizzük, hogy van-e már mentett rekordja
         const existingRecord = sorted.find(r => r.code === currentCode);
+        const displayPoints = Math.max(currentSessionPoints, existingRecord?.points || 0);
         
-        // A MEGJELENÍTENDŐ PONT: a session pontok, vagy a mentett rekord (ha nincs session pont)
-        const displayPoints = currentSessionPoints > 0 ? currentSessionPoints : (existingRecord?.points || 0);
-        
-        if (displayPoints > 0) {
-            currentRecord = {
-                code: currentCode,
-                points: displayPoints,
-                timestamp: existingRecord?.timestamp || this.formatTimestamp(new Date())
-            };
-            // Ellenőrizzük, hogy benne van-e a top 10-ben
-            currentInTop10 = top10.some(r => r.code === currentCode && r.points >= displayPoints);
-        }
+        currentRecord = {
+            code: currentCode,
+            points: displayPoints,
+            timestamp: existingRecord?.timestamp || this.formatTimestamp(new Date())
+        };
+        currentInTop10 = top10.some(r => r.code === currentCode && r.points >= currentRecord.points);
     }
 
-    // Ranglista HTML előállítása
     const lang = window.GeryApp?.modules?.language;
     let html = `
         <div class="modal-overlay active" id="ranking-modal">
@@ -370,53 +362,68 @@ showRanking() {
                     </div>
     `;
 
-    if (top10.length === 0 && (!currentRecord || currentRecord.points === 0)) {
+    if (top10.length === 0) {
         html += `<div class="rank-empty">${lang?.t('points_empty') || 'Még nincs pontszám'}</div>`;
     } else {
-        // Top 10 mutatása
-        if (top10.length > 0) {
-            top10.forEach((record, index) => {
-                const isCurrent = record.code === currentCode && record.points === currentRecord?.points;
-                html += `
-                    <div class="rank-item ${isCurrent ? 'current' : ''}">
-                        <span class="rank-pos">#${index + 1}</span>
-                        <span class="rank-code">${record.code}</span>
-                        <span class="rank-points">${record.points}</span>
-                        <span class="rank-time">${record.timestamp}</span>
-                    </div>
-                `;
-            });
-        }
-
-        // AKTUÁLIS JÁTÉKOS HOZZÁADÁSA (ha nincs a top 10-ben, de van pontja)
-        if (currentRecord && !currentInTop10) {
-            // Számoljuk ki a helyezését
-            const allRecords = [...sorted];
-            if (currentSessionPoints > 0) {
-                // Ha a session pontok nagyobbak, mint a mentett rekord, akkor azt használjuk
-                const existing = allRecords.find(r => r.code === currentCode);
-                if (existing) {
-                    const idx = allRecords.indexOf(existing);
-                    allRecords[idx] = { ...existing, points: Math.max(existing.points, currentSessionPoints) };
-                } else {
-                    allRecords.push({ code: currentCode, points: currentSessionPoints, timestamp: currentRecord.timestamp });
-                }
-                allRecords.sort((a, b) => b.points - a.points);
-            }
-            const rank = allRecords.findIndex(r => r.code === currentCode) + 1;
-            
+        top10.forEach((record, index) => {
+            const isCurrent = record.code === currentCode;
             html += `
-                <div class="rank-divider">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</div>
-                <div style="margin-bottom:8px;font-weight:700;color:var(--brown-dark);font-size:0.85rem;">
-                    🎯 ${lang?.t('points_current') || 'Te'}
-                </div>
-                <div class="rank-item current">
-                    <span class="rank-pos">#${rank}</span>
-                    <span class="rank-code">${currentRecord.code}</span>
-                    <span class="rank-points">${currentRecord.points}</span>
-                    <span class="rank-time">${currentRecord.timestamp}</span>
+                <div class="rank-item ${isCurrent ? 'current' : ''}">
+                    <span class="rank-pos">#${index + 1}</span>
+                    <span class="rank-code">${record.code}</span>
+                    <span class="rank-points">${record.points}</span>
+                    <span class="rank-time">${record.timestamp}</span>
                 </div>
             `;
+        });
+    }
+
+    // ★★★ A "Te" sor MINDIG jelenjen meg, ha a játékos be van jelentkezve! ★★★
+    if (currentRecord) {
+        // Ha a játékos NINCS a top 10-ben
+        if (!currentInTop10) {
+            const allRecords = [...sorted];
+            const existing = allRecords.find(r => r.code === currentCode);
+            if (existing) {
+                const idx = allRecords.indexOf(existing);
+                allRecords[idx] = { ...existing, points: Math.max(existing.points, currentSessionPoints) };
+            } else if (currentSessionPoints > 0) {
+                allRecords.push({ code: currentCode, points: currentSessionPoints, timestamp: currentRecord.timestamp });
+            }
+            allRecords.sort((a, b) => b.points - a.points);
+            const rank = allRecords.findIndex(r => r.code === currentCode) + 1;
+            
+            if (rank > 0) {
+                html += `
+                    <div class="rank-divider">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</div>
+                    <div style="margin-bottom:8px;font-weight:700;color:var(--brown-dark);font-size:0.85rem;">
+                        🎯 ${lang?.t('points_current') || 'Te'}
+                    </div>
+                    <div class="rank-item current">
+                        <span class="rank-pos">#${rank}</span>
+                        <span class="rank-code">${currentRecord.code}</span>
+                        <span class="rank-points">${currentRecord.points}</span>
+                        <span class="rank-time">${currentRecord.timestamp}</span>
+                    </div>
+                `;
+            }
+        } else {
+            // Ha BENNE VAN a top 10-ben, de a session pontok nagyobbak
+            const top10Record = top10.find(r => r.code === currentCode);
+            if (top10Record && currentSessionPoints > top10Record.points) {
+                html += `
+                    <div class="rank-divider">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</div>
+                    <div style="margin-bottom:8px;font-weight:700;color:var(--brown-dark);font-size:0.85rem;">
+                        🎯 ${lang?.t('points_current') || 'Te (aktualizált)'}
+                    </div>
+                    <div class="rank-item current">
+                        <span class="rank-pos">#${top10.indexOf(top10Record) + 1}</span>
+                        <span class="rank-code">${currentRecord.code}</span>
+                        <span class="rank-points">${currentSessionPoints}</span>
+                        <span class="rank-time">${this.formatTimestamp(new Date())}</span>
+                    </div>
+                `;
+            }
         }
     }
 
@@ -426,17 +433,14 @@ showRanking() {
         </div>
     `;
 
-    // Modal hozzáadása a DOM-hoz
     const modalContainer = document.createElement('div');
     modalContainer.innerHTML = html;
     document.body.appendChild(modalContainer.firstElementChild);
 
-    // Bezárás gomb működése
     document.querySelector('#ranking-modal .modal-close')?.addEventListener('click', () => {
         document.getElementById('ranking-modal')?.remove();
     });
 
-    // Háttérre kattintva bezárás
     document.getElementById('ranking-modal')?.addEventListener('click', (e) => {
         if (e.target === e.currentTarget) {
             e.target.remove();
