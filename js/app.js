@@ -577,31 +577,28 @@ export class App {
     }
 
     // ---------- BÚCSÚZÓ KÉPERNYŐ ----------
-    initGoodbyeScreen(data) {
-        const screen = this.screens.goodbye;
-        if (!screen) return;
-        
-        const pointsDisplay = screen.querySelector('.points-display');
-        const codeDisplay = screen.querySelector('.code-display');
-        const dateDisplay = screen.querySelector('.date-display');
+initGoodbyeScreen(data) {
+    const screen = this.screens.goodbye;
+    if (!screen) return;
+    
+    const pointsDisplay = screen.querySelector('.points-display');
+    const codeDisplay = screen.querySelector('.code-display');
+    const dateDisplay = screen.querySelector('.date-display');
 
-        // ★★★ HA A data ÜRES, HASZNÁLD A GLOBÁLIS VÁLTOZÓT! ★★★
-        const points = data?.points ?? window._goodbyeData?.points ?? 0;
-        const code = data?.code ?? window._goodbyeData?.code ?? '----';
-
-        if (pointsDisplay) {
-            pointsDisplay.textContent = points;
-        }
-        if (codeDisplay) {
-            codeDisplay.textContent = code;
-        }
-        if (dateDisplay) {
-            const now = new Date();
-            const lang = this.modules.language.getLanguage();
-            const dateStr = this.formatDate(now, lang);
-            dateDisplay.textContent = dateStr;
-        }
+    // data-ból olvassuk ki az értékeket (a kilépéskori állapot)
+    if (pointsDisplay) {
+        pointsDisplay.textContent = data?.points || 0;
     }
+    if (codeDisplay) {
+        codeDisplay.textContent = data?.code || '----';
+    }
+    if (dateDisplay) {
+        const now = new Date();
+        const lang = this.modules.language.getLanguage();
+        const dateStr = this.formatDate(now, lang);
+        dateDisplay.textContent = dateStr;
+    }
+}
 
     // ---------- DÁTUM FORMÁZÁS ----------
     formatDate(date, lang) {
@@ -617,45 +614,39 @@ export class App {
     }
 
     // ---------- KILÉPÉS ----------
-    async exitApplication() {
-        // 1. Mentsük el a kódszámot és a session pontokat
-        const userCode = this.state.userCode;
-        const sessionPoints = this.state.sessionPoints;
+async exitApplication() {
+    // 1. Eltároljuk a globális változók értékét
+    const userCode = this.state.userCode;
+    const sessionPoints = this.state.sessionPoints;
 
-        // 2. Pontok mentése
-        if (userCode && sessionPoints > 0) {
-            await this.modules.points.savePoints(
-                userCode,
-                sessionPoints,
-                this.state.gameScores
-            );
-        }
-
-        // ★★★ MENTSÜK EL AZ ADATOKAT GLOBÁLISAN! ★★★
-        window._goodbyeData = {
-            points: sessionPoints,
-            code: userCode
-        };
-
-        // 3. Pontok nullázása
-        this.state.totalPoints = 0;
-        this.state.sessionPoints = 0;
-        this.state.gameScores = [0, 0, 0, 0];
-        this.state.isCodeValid = false;
-
-        const pointsLabel = document.querySelector('#btn-points .label');
-        if (pointsLabel) {
-            pointsLabel.textContent = '0';
-        }
-
-        // 4. Búcsúzó képernyő - átadjuk a pontokat
-        await this.showScreen('goodbye', {
-            points: sessionPoints,
-            code: userCode
-        });
-        this.state.userCode = null;
-        console.log(`👋 Kilépés: ${userCode} | Mentett pontok: ${sessionPoints}`);
+    // 2. MENTJÜK az új rekordot a points.csv-hez (ha van kód és pont)
+    if (userCode && sessionPoints > 0) {
+        await this.modules.points.savePoints(userCode, sessionPoints, this.state.gameScores);
     }
+
+    // 3. NULLÁZZUK a globális változókat (csak a mentés UTÁN!)
+    this.state.totalPoints = 0;
+    this.state.sessionPoints = 0;
+    this.state.gameScores = [0, 0, 0, 0];
+    this.state.isCodeValid = false;
+    // ★★★ A userCode-ot is nullázzuk, de a goodbye képernyőnek már átadtuk! ★★★
+    const codeForGoodbye = this.state.userCode;
+    this.state.userCode = null;
+
+    // 4. Frissítjük a pont gombot
+    const pointsLabel = document.querySelector('#btn-points .label');
+    if (pointsLabel) {
+        pointsLabel.textContent = '0';
+    }
+
+    // 5. Megjelenítjük a goodbye képernyőt (a nullázás ELŐTTI értékekkel!)
+    await this.showScreen('goodbye', {
+        points: sessionPoints,
+        code: codeForGoodbye
+    });
+
+    console.log(`👋 Kilépés: ${codeForGoodbye} | Mentett pontok: ${sessionPoints}`);
+}
 
     // ---------- JÁTÉK INDÍTÁS ----------
     startGame(gameId) {
