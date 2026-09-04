@@ -176,44 +176,44 @@ export class PointsManager {
     }
 
     // ---------- PONTOK MENTÉSE ----------
-    async savePoints(code, totalPoints, gameScores) {
-        if (!code) {
-            console.warn('⚠️ Nincs kódszám a mentéshez');
-            return false;
-        }
-
-        const upperCode = code.toUpperCase().trim();
-        const now = new Date();
-        const timestamp = this.formatTimestamp(now);
-        
-        // 1. Új rekord létrehozása
-        const newRecord = {
-            code: upperCode,
-            points: totalPoints,
-            timestamp: timestamp
-        };
-        
-        // 2. Hozzáadás a ponthoz
-        this.pointsData.push(newRecord);
-        
-        // 3. Mentés localStorage-ba (backup)
-        this.saveToLocalStorage(upperCode, totalPoints, timestamp);
-        
-        // 4. CSV letöltés (opcionális, de jó backup)
-        this.downloadCSV();
-        
-        // 5. Frissítés a globális állapotban
-        if (window.GeryApp) {
-            window.GeryApp.state.pointsData = this.pointsData;
-        }
-        
-        console.log(`💾 Pontok mentve: ${upperCode} → ${totalPoints} pont (${timestamp})`);
-        
-        // 6. Kísérlet a szerverre küldésre (ha van API)
-        await this.sendToServer(upperCode, totalPoints, timestamp);
-        
-        return true;
+async savePoints(code, points, gameScores) {
+    if (!code) {
+        console.warn('⚠️ Nincs kódszám a mentéshez');
+        return false;
     }
+
+    const upperCode = code.toUpperCase().trim();
+    const now = new Date();
+    const timestamp = this.formatTimestamp(now);
+    
+    // 1. Új rekord létrehozása (ÉS CSAK ÚJ REKORD!)
+    const newRecord = {
+        code: upperCode,
+        points: points,          // ← A SESSION PONTOKAT RÖGZÍTJÜK
+        timestamp: timestamp
+    };
+    
+    // 2. Hozzáadás a ponthoz
+    this.pointsData.push(newRecord);
+    
+    // 3. Mentés localStorage-ba (backup)
+    this.saveToLocalStorage(upperCode, points, timestamp);
+    
+    // 4. CSV letöltés (opcionális)
+    this.downloadCSV();
+    
+    // 5. Frissítés a globális állapotban
+    if (window.GeryApp) {
+        window.GeryApp.state.pointsData = this.pointsData;
+    }
+    
+    console.log(`💾 Pontok mentve: ${upperCode} → ${points} pont (${timestamp})`);
+    
+    // 6. Kísérlet a szerverre küldésre (ha van API)
+    await this.sendToServer(upperCode, points, timestamp);
+    
+    return true;
+}
 
     // ---------- IDŐPONT FORMAZÁS ----------
 formatTimestamp(date) {
