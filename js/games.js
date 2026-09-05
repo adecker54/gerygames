@@ -78,7 +78,7 @@ export class GamesManager {
             html += `
                 <div class="game-card ${isLocked ? 'locked' : ''}" 
                      data-game-id="${game.id}"
-                     onclick="window.GeryApp?.modules?.games?.selectGame(${game.id})">
+                     onclick="window.GeryApp.modules.games.selectGame(${game.id})">
                     <img class="game-image" 
                          src="${game.image}" 
                          alt="${name}"
