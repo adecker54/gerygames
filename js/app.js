@@ -90,30 +90,19 @@ export class App {
 
         // Képernyő specifikus inicializálás
         if (screenName === 'intro') {
+            // ★★★ BELÉPÉSKOR NULLÁZZUK A PONTOKAT ÉS A KÓDOT! ★★★
             this.state.totalPoints = 0;
             this.state.sessionPoints = 0;
             this.state.gameScores = [0, 0, 0, 0];
             this.state.isCodeValid = false;
             this.state.userCode = null;
 
-            const pointsLabel = document.querySelector('#btn-points .label');
-            if (pointsLabel) {
-                pointsLabel.textContent = '0';
-            }
-            this.initIntroVideo();
-        } else if (screenName === 'menu') {
-            this.modules.games.renderMenu();
-        } else if (screenName === 'goodbye') {
-            this.initGoodbyeScreen(data);
-        } else if (screenName === 'admin') {
-            if (this.state.isAdmin) {
-                this.modules.admin.render();
-            } else {
-                // Ha nem admin, vissza a főképernyőre
-                this.showScreen('intro');
-            }
+        const pointsLabel = document.querySelector('#btn-points .label');
+        if (pointsLabel) {
+            pointsLabel.textContent = '0';
         }
-
+        this.initIntroVideo();
+    }
         // Nyelvi frissítés
         this.updateScreenTexts();
         this.modules.language.applyToDOM();
@@ -585,7 +574,7 @@ initGoodbyeScreen(data) {
     const codeDisplay = screen.querySelector('.code-display');
     const dateDisplay = screen.querySelector('.date-display');
 
-    // data-ból olvassuk ki az értékeket (a kilépéskori állapot)
+    // ★★★ KIZÁRÓLAG A KAPOTT ADATOKAT HASZNÁLJUK! ★★★
     if (pointsDisplay) {
         pointsDisplay.textContent = data?.points || 0;
     }
@@ -615,37 +604,27 @@ initGoodbyeScreen(data) {
 
     // ---------- KILÉPÉS ----------
 async exitApplication() {
-    // 1. Eltároljuk a globális változók értékét
+    // 1. Mentsük el a kilépéskori értékeket
     const userCode = this.state.userCode;
     const sessionPoints = this.state.sessionPoints;
 
-    // 2. MENTJÜK az új rekordot a points.csv-hez (ha van kód és pont)
+    // 2. Új rekord mentése (ha van kód és pont)
     if (userCode && sessionPoints > 0) {
         await this.modules.points.savePoints(userCode, sessionPoints, this.state.gameScores);
     }
 
-    // 3. NULLÁZZUK a globális változókat (csak a mentés UTÁN!)
-    this.state.totalPoints = 0;
-    this.state.sessionPoints = 0;
-    this.state.gameScores = [0, 0, 0, 0];
-    this.state.isCodeValid = false;
-    // ★★★ A userCode-ot is nullázzuk, de a goodbye képernyőnek már átadtuk! ★★★
-    const codeForGoodbye = this.state.userCode;
-    this.state.userCode = null;
-
-    // 4. Frissítjük a pont gombot
-    const pointsLabel = document.querySelector('#btn-points .label');
-    if (pointsLabel) {
-        pointsLabel.textContent = '0';
-    }
-
-    // 5. Megjelenítjük a goodbye képernyőt (a nullázás ELŐTTI értékekkel!)
+    // 3. A goodbye képernyőnek átadjuk az értékeket
     await this.showScreen('goodbye', {
         points: sessionPoints,
-        code: codeForGoodbye
+        code: userCode
     });
 
-    console.log(`👋 Kilépés: ${codeForGoodbye} | Mentett pontok: ${sessionPoints}`);
+    // ★★★ KILÉPÉS UTÁN NEM NULLÁZZUK A STATE-ET! ★★★
+    // A következő belépéskor az intro képernyő úgyis nullázza.
+    // De ha a játékos a goodbye-ról a vote gombbal a linkekre megy,
+    // és onnan tér vissza, akkor a state-ben még mindig ott vannak az értékek.
+
+    console.log(`👋 Kilépés: ${userCode} | Mentett pontok: ${sessionPoints}`);
 }
 
     // ---------- JÁTÉK INDÍTÁS ----------

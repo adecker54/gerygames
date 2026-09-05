@@ -355,6 +355,7 @@ showRanking() {
         html += `<div class="rank-empty">${lang?.t('points_empty') || 'Még nincs pontszám'}</div>`;
     } else {
         top10.forEach((record, index) => {
+            // ★★★ ITT A VÁLTOZÁS: A játékos akkor van a top 10-ben, ha a CODE egyezik ★★★
             const isCurrent = record.code === currentCode;
             html += `
                 <div class="rank-item ${isCurrent ? 'current' : ''}">
@@ -367,16 +368,15 @@ showRanking() {
         });
     }
 
-    // 7. "TE" sor hozzáadása (ha a játékos be van jelentkezve és nincs a top 10-ben)
+    // 7. "TE" sor hozzáadása (CSAK HA NINCS A TOP 10-BEN, DE VAN PONTJA!)
     if (currentCode && currentSessionPoints > 0) {
         // Ellenőrizzük, hogy a játékos benne van-e a top 10-ben
-        const isInTop10 = top10.some(r => r.code === currentCode && r.points >= currentSessionPoints);
+        const isInTop10 = top10.some(r => r.code === currentCode);
         
-        // Ha a játékos NINCS a top 10-ben, akkor jelenítsük meg
+        // ★★★ HA NINCS A TOP 10-BEN, AKKOR JELENÍTJÜK MEG A "TE" SORT ★★★
         if (!isInTop10) {
             // Számoljuk ki a helyezést (a teljes lista alapján)
             const allRecords = [...sorted];
-            // Ha a session pontok nagyobbak, mint a mentett rekord, akkor frissítsük
             const existing = allRecords.find(r => r.code === currentCode);
             if (existing) {
                 const idx = allRecords.indexOf(existing);
@@ -400,37 +400,6 @@ showRanking() {
                         <span class="rank-time">${this.formatTimestamp(new Date())}</span>
                     </div>
                 `;
-            }
-        } else {
-            // Ha BENNE VAN a top 10-ben, de a session pontok nagyobbak, mint a mentett rekord
-            const top10Record = top10.find(r => r.code === currentCode);
-            if (top10Record && currentSessionPoints > top10Record.points) {
-                // Számoljuk ki a helyezést (a teljes lista alapján)
-                const allRecords = [...sorted];
-                const existing = allRecords.find(r => r.code === currentCode);
-                if (existing) {
-                    const idx = allRecords.indexOf(existing);
-                    allRecords[idx] = { ...existing, points: Math.max(existing.points, currentSessionPoints) };
-                } else {
-                    allRecords.push({ code: currentCode, points: currentSessionPoints, timestamp: this.formatTimestamp(new Date()) });
-                }
-                allRecords.sort((a, b) => b.points - a.points);
-                const rank = allRecords.findIndex(r => r.code === currentCode) + 1;
-                
-                if (rank > 0) {
-                    html += `
-                        <div class="rank-divider">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</div>
-                        <div style="margin-bottom:8px;font-weight:700;color:var(--brown-dark);font-size:0.85rem;">
-                            🎯 ${lang?.t('points_current') || 'Te (aktualizált)'}
-                        </div>
-                        <div class="rank-item current">
-                            <span class="rank-pos">#${rank}</span>
-                            <span class="rank-code">${currentCode}</span>
-                            <span class="rank-points">${currentSessionPoints}</span>
-                            <span class="rank-time">${this.formatTimestamp(new Date())}</span>
-                        </div>
-                    `;
-                }
             }
         }
     }
