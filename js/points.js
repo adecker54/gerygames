@@ -154,29 +154,21 @@ export class PointsManager {
     loadPointsForCode(code) {
         const upperCode = code.toUpperCase().trim();
         const records = this.pointsData.filter(row => row.code === upperCode);
-        
-        if (records.length > 0) {
-            // Utolsó rekord pontszáma
-            const latest = records[records.length - 1];
-            this.currentPoints = latest.points || 0;
-        } else {
-            this.currentPoints = 0;
-        }
-        
-        // Globális állapot frissítése
+    
+        // ★★★ CSAK A GLOBÁLIS ÁLLAPOTBA MENTJÜK AZ EDDIGI PONTOKAT, DE A sessionPoints-ot NEM ÁLLÍTJUK BE! ★★★
         if (window.GeryApp) {
-            window.GeryApp.state.previousPoints = this.currentPoints;
-            window.GeryApp.state.totalPoints = this.currentPoints;
+            window.GeryApp.state.previousPoints = records.length > 0 ? records[records.length - 1].points : 0;
             window.GeryApp.state.userCode = upperCode;
             window.GeryApp.state.isCodeValid = true;
+            // ★★★ A sessionPoints MARADJON 0! ★★★
         }
-        
-        console.log(`📊 Kód: ${upperCode}, eddigi pontok: ${this.currentPoints}`);
-        return this.currentPoints;
+    
+        console.log(`📊 Kód: ${upperCode}, eddigi pontok: ${records.length > 0 ? records[records.length - 1].points : 0}`);
+        return records.length > 0 ? records[records.length - 1].points : 0;
     }
 
     // ---------- PONTOK MENTÉSE ----------
-async savePoints(code, points, gameScores) {
+    async savePoints(code, points, gameScores) {
     if (!code) {
         console.warn('⚠️ Nincs kódszám a mentéshez');
         return false;
@@ -213,7 +205,7 @@ async savePoints(code, points, gameScores) {
     await this.sendToServer(upperCode, points, timestamp);
     
     return true;
-}
+    }
 
     // ---------- IDŐPONT FORMAZÁS ----------
 formatTimestamp(date) {
@@ -322,7 +314,7 @@ formatTimestamp(date) {
     }
 
     // ---------- RANGLISTA MEGJELENÍTÉS ----------
-showRanking() {
+    showRanking() {
     // 1. Rendezés pontszám szerint csökkenő sorrendbe
     const sorted = [...this.pointsData].sort((a, b) => b.points - a.points);
     

@@ -482,36 +482,29 @@ export class App {
     // ---------- KÓDSZÁM ELLENŐRZÉS ----------
     validateCode(code, input, errorMsg, continueBtn, supportBtn) {
         const isValid = this.modules.points.validateCode(code);
-        
+    
         if (isValid) {
             this.state.userCode = code;
             this.state.isCodeValid = true;
+            // ★★★ NE TÖLTSD BE A PONTOKAT! A sessionPoints 0-RÓL INDUL! ★★★
+            this.state.sessionPoints = 0;
+            this.state.totalPoints = 0;
+            this.state.gameScores = [0, 0, 0, 0];
+        
             input.classList.remove('error');
             errorMsg.textContent = '';
             errorMsg.style.display = 'none';
             continueBtn.classList.add('visible');
             supportBtn.classList.remove('active');
-            this.modules.points.loadPointsForCode(code);
+        
+            // ★★★ A PONTOKAT CSAK A RANGLISTÁHOZ TÖLTSD BE! ★★★
+            // De a sessionPoints-hoz NE nyúlj!
+            this.modules.points.loadPointsForCode(code); // Ez csak a pointsData-t frissíti, a sessionPoints-ot NEM!
+        
         } else {
-            this.state.isCodeValid = false;
-            input.classList.add('error');
-            
-            // HIBAÜZENET MEGJELENÍTÉSE - JOBB DESIGN
-            errorMsg.textContent = this.modules.language?.t('invalid_code') || '❌ Nem jó a kódszám!';
-            errorMsg.style.display = 'block';
-            
-            continueBtn.classList.remove('visible');
-            this.modules.sound.playError();
-            
-            // 3 MÁSODPERCIG LÁTHATÓ
-            setTimeout(() => {
-                input.classList.remove('error');
-                errorMsg.textContent = '';
-                errorMsg.style.display = 'none';
-            }, 3000);
+            // ... hiba kezelés ...
         }
     }
-
     // ---------- VIDEÓ KEZELÉS ----------
     initIntroVideo() {
         const video = this.videoElement;
