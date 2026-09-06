@@ -351,7 +351,7 @@ formatTimestamp(date) {
             currentInTop10 = true;
         }
     }
-    
+}    
     // 4. Nyelvi segédváltozó
     const lang = window.GeryApp?.modules?.language;
     
