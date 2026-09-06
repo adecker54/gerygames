@@ -67,11 +67,11 @@ export class App {
         if (this.currentScreen === 'game' && screenName !== 'game' && screenName !== 'goodbye') {
             // Itt még nem mentünk, csak ha tényleg kilépés
         } 
-else if (screenName === 'menu') {
-    console.log('🔍 renderMenu() meghívása előtt');
-    this.modules.games.renderMenu();
-    console.log('🔍 renderMenu() meghívása után');
-}
+        else if (screenName === 'menu') {
+            console.log('🔍 renderMenu() meghívása előtt');
+            this.modules.games.renderMenu();
+            console.log('🔍 renderMenu() meghívása után');
+        }
 
         // Összes képernyő elrejtése
         Object.values(this.screens).forEach(el => {
@@ -102,12 +102,12 @@ else if (screenName === 'menu') {
             this.state.isCodeValid = false;
             this.state.userCode = null;
 
-        const pointsLabel = document.querySelector('#btn-points .label');
-        if (pointsLabel) {
-            pointsLabel.textContent = '0';
+            const pointsLabel = document.querySelector('#btn-points .label');
+            if (pointsLabel) {
+                pointsLabel.textContent = '0';
+            }
+            this.initIntroVideo();
         }
-        this.initIntroVideo();
-    }
         // Nyelvi frissítés
         this.updateScreenTexts();
         this.modules.language.applyToDOM();
@@ -261,18 +261,18 @@ else if (screenName === 'menu') {
             backBtn.addEventListener('click', () => {
                 this.modules.sound.playClick();
             
-                // Pontok nullázása
-                this.state.totalPoints = 0;
-                this.state.sessionPoints = 0;
-                this.state.gameScores = [0, 0, 0, 0];
-                this.state.isCodeValid = false;
-                this.state.userCode = null;
+                // Pontok nullázása - felesleges
+        //        this.state.totalPoints = 0;
+        //        this.state.sessionPoints = 0;
+        //        this.state.gameScores = [0, 0, 0, 0];
+        //        this.state.isCodeValid = false;
+        //        this.state.userCode = null;
             
                 // Pont gomb frissítése
-                const pointsLabel = document.querySelector('#btn-points .label');
-                if (pointsLabel) {
-                    pointsLabel.textContent = '0';
-                }
+        //        const pointsLabel = document.querySelector('#btn-points .label');
+        //        if (pointsLabel) {
+        //            pointsLabel.textContent = '0';
+        //        }
             
                 // Vissza a nyitóképernyőre
                 this.showScreen('intro');

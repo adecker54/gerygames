@@ -322,8 +322,35 @@ formatTimestamp(date) {
     const top10 = sorted.slice(0, 10);
     
     // 3. Globális változók lekérése
+    // Aktuális játékos keresése
+
     const currentCode = window.GeryApp?.state?.userCode;
     const currentSessionPoints = window.GeryApp?.state?.sessionPoints || 0;
+    
+    // ★★★ MINDIG HOZZUNK LÉTRE "TE" SORT, HA A JÁTÉKOS BE VAN JELENTKEZVE! ★★★
+    let currentRecord = null;
+    let currentInTop10 = false;
+
+    if (currentCode) {
+        const existingRecord = sorted.find(r => r.code === currentCode);
+        const displayPoints = Math.max(currentSessionPoints, existingRecord?.points || 0);
+    
+        // MINDIG létrehozzuk a rekordot, ha a játékos be van jelentkezve
+        currentRecord = {
+            code: currentCode,
+            points: displayPoints,
+            timestamp: existingRecord?.timestamp || this.formatTimestamp(new Date())
+        };
+    
+        // Ellenőrizzük, hogy benne van-e a top 10-ben
+        currentInTop10 = top10.some(r => r.code === currentCode && r.points >= currentRecord.points);
+        // ★★★ HA A JÁTÉKOS PONTJAI ELÉRIK A TOP 10 SZINTJÉT, AKKOR IGAZ! ★★★
+        if (!currentInTop10 && currentRecord) {
+        // Ellenőrizzük, hogy a játékos pontjai nagyobbak-e, mint a 10. helyezetté
+        if (top10.length === 10 && currentRecord.points > top10[9].points) {
+            currentInTop10 = true;
+        }
+    }
     
     // 4. Nyelvi segédváltozó
     const lang = window.GeryApp?.modules?.language;
