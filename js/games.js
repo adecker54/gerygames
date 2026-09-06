@@ -99,7 +99,7 @@ export class GamesManager {
         html += `
             </div>
         `;
-
+console.log('HTML tartalom:', html);
         screen.innerHTML = html;
 
         // Nyelvi frissítés
