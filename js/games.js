@@ -56,60 +56,73 @@ export class GamesManager {
     }
 
     // Játékmenü megjelenítése
-    renderMenu() {
-        const screen = document.getElementById('screen-menu');
-        if (!screen) return;
+renderMenu() {
+    console.log('🔍 renderMenu() meghívva');
 
-        const lang = window.GeryApp?.modules?.language;
-        const state = window.GeryApp?.state;
+    const screen = document.getElementById('screen-menu');
+    console.log('🔍 screen elem:', screen);
+    if (!screen) {
+        console.warn('⚠️ screen-menu nem található!');
+        return;
+    }
 
-        let html = `
-            <div class="menu-title" data-i18n="menu_title">
-                ${lang?.t('menu_title') || 'Játszva támogatom Geryt, a hegyi macskát'}
-            </div>
-            <div class="games-grid">
-        `;
+    const lang = window.GeryApp?.modules?.language;
+    const state = window.GeryApp?.state;
+    console.log('🔍 lang:', lang);
+    console.log('🔍 state:', state);
 
-        this.games.forEach(game => {
-            const isLocked = !state?.isCodeValid;
-            const score = state?.gameScores?.[game.id - 1] || 0;
-            const name = lang?.t(game.name) || game.name;
+    let html = `
+        <div class="menu-title" data-i18n="menu_title">
+            ${lang?.t('menu_title') || 'Játszva támogatom Geryt, a hegyi macskát'}
+        </div>
+        <div class="games-grid">
+    `;
 
-            html += `
-                <div class="game-card ${isLocked ? 'locked' : ''}" 
-                     data-game-id="${game.id}"
-                     onclick="window.GeryApp.modules.games.selectGame(${game.id})">
-                    <img class="game-image" 
-                         src="${game.image}" 
-                         alt="${name}"
-                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect width=%22200%22 height=%22200%22 fill=%22%23C4A88C%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22 fill=%22%238B6B4F%22%3E🎮%3C/text%3E%3C/svg%3E'">
-                    <div class="game-info">
-                        <div class="game-name">${name}</div>
-                        <div class="game-multiplier">
-                            ${lang?.t('multiplier_label') || 'Szorzó:'} 
-                            <span>×${game.multiplier}</span>
-                        </div>
-                        ${score > 0 ? `<div class="game-score">🏆 ${score} ${lang?.t('points_score') || 'pont'}</div>` : ''}
-                        ${isLocked ? `<div style="font-size:0.65rem;color:#c0392b;margin-top:4px;">🔒 ${lang?.t('enter_code') || 'Add meg a kódot'}</div>` : ''}
-                    </div>
-                </div>
-            `;
-        });
+    this.games.forEach(game => {
+        const isLocked = !state?.isCodeValid;
+        const score = state?.gameScores?.[game.id - 1] || 0;
+        const name = lang?.t(game.name) || game.name;
 
         html += `
+            <div class="game-card ${isLocked ? 'locked' : ''}" 
+                 data-game-id="${game.id}"
+                 onclick="window.GeryApp.modules.games.selectGame(${game.id})">
+                <img class="game-image" 
+                     src="${game.image}" 
+                     alt="${name}"
+                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect width=%22200%22 height=%22200%22 fill=%22%23C4A88C%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22 fill=%22%238B6B4F%22%3E🎮%3C/text%3E%3C/svg%3E'">
+                <div class="game-info">
+                    <div class="game-name">${name}</div>
+                    <div class="game-multiplier">
+                        ${lang?.t('multiplier_label') || 'Szorzó:'} 
+                        <span>×${game.multiplier}</span>
+                    </div>
+                    ${score > 0 ? `<div class="game-score">🏆 ${score} ${lang?.t('points_score') || 'pont'}</div>` : ''}
+                    ${isLocked ? `<div style="font-size:0.65rem;color:#c0392b;margin-top:4px;">🔒 ${lang?.t('enter_code') || 'Add meg a kódot'}</div>` : ''}
+                </div>
             </div>
         `;
-console.log('HTML tartalom:', html);
-        screen.innerHTML = html;
+    });
 
-        // Nyelvi frissítés
-        if (lang) {
-            lang.applyToDOM();
-        }
+    html += `
+        </div>
+    `;
 
-        // Pontok frissítése a menüben
-        this.updateMenuPoints();
+    console.log('🔍 HTML tartalom hossza:', html.length);
+    console.log('🔍 HTML első 200 karaktere:', html.substring(0, 200));
+
+    screen.innerHTML = html;
+    console.log('🔍 screen.innerHTML beállítva');
+
+    // Nyelvi frissítés
+    if (lang) {
+        lang.applyToDOM();
     }
+
+    // Pontok frissítése a menüben
+    this.updateMenuPoints();
+    console.log('🔍 renderMenu() befejezve');
+}
 
     // Játék kiválasztása
     selectGame(gameId) {
