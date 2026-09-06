@@ -66,7 +66,12 @@ export class App {
         // Kilépés előtti mentés (ha menüből vagy játékból lépünk ki)
         if (this.currentScreen === 'game' && screenName !== 'game' && screenName !== 'goodbye') {
             // Itt még nem mentünk, csak ha tényleg kilépés
-        }
+        } 
+else if (screenName === 'menu') {
+    console.log('🔍 renderMenu() meghívása előtt');
+    this.modules.games.renderMenu();
+    console.log('🔍 renderMenu() meghívása után');
+}
 
         // Összes képernyő elrejtése
         Object.values(this.screens).forEach(el => {
