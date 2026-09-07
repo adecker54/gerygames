@@ -609,8 +609,8 @@ async exitApplication() {
     if (userCode && sessionPoints > 0) {
         await this.modules.points.savePoints(
             userCode,
-            sessionPoints,
-            gameScores
+            sessionPoints
+//            gameScores
         );
     }
 
