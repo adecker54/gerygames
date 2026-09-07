@@ -243,8 +243,8 @@ export class App {
                 this.modules.sound.playClick();
         
                 // ★★★ HASZNÁLD A GLOBÁLIS VÁLTOZÓT! ★★★
-                const points = window._goodbyeData?.points || 0;
-                const code = window._goodbyeData?.code || '----';
+                // új törlés const points = window._goodbyeData?.points || 0;
+                // új törlés const code = window._goodbyeData?.code || '----';
         
                 this.showScreen('goodbye', { points: points, code: code });
             });
@@ -285,10 +285,10 @@ export class App {
             voteBtn.addEventListener('click', () => {
                 this.modules.sound.playClick();
                 // MENTSÜK EL A PONTOKAT ÉS A KÓDSZÁMOT A VISSZATÉRÉSHEZ!
-                this._goodbyeData = {
-                    points: this.state.sessionPoints,
-                    code: this.state.userCode
-                };
+         // új törlés       this._goodbyeData = {
+         // új törlés           points: this.state.sessionPoints,
+         // új törlés           code: this.state.userCode
+         // új törlés       };
                 this.showScreen('links');
             });
         }
@@ -564,7 +564,7 @@ export class App {
     }
 
     // ---------- BÚCSÚZÓ KÉPERNYŐ ----------
-initGoodbyeScreen(data) {
+initGoodbyeScreen() {
     const screen = this.screens.goodbye;
     if (!screen) return;
     
@@ -572,12 +572,12 @@ initGoodbyeScreen(data) {
     const codeDisplay = screen.querySelector('.code-display');
     const dateDisplay = screen.querySelector('.date-display');
 
-    // ★★★ KIZÁRÓLAG A KAPOTT ADATOKAT HASZNÁLJUK! ★★★
+    // ★★★ KIZÁRÓLAG A KAPOTT ADATOKAT HASZNÁLJUK A STATE-BŐL! ★★★
     if (pointsDisplay) {
-        pointsDisplay.textContent = data?.points || 0;
+        pointsDisplay.textContent = this.state.sessionPoints || 0;
     }
     if (codeDisplay) {
-        codeDisplay.textContent = data?.code || '----';
+        codeDisplay.textContent = this.state.userCode || '----';
     }
     if (dateDisplay) {
         const now = new Date();
@@ -606,16 +606,21 @@ async exitApplication() {
     const userCode = this.state.userCode;
     const sessionPoints = this.state.sessionPoints;
 
+    if (userCode && sessionPoints > 0) {
+        await this.modules.points.savePoints(
+            userCode,
+            sessionPoints,
+            gameScores
+        );
+    }
+
     // 2. Új rekord mentése (ha van kód és pont)
     if (userCode && sessionPoints > 0) {
         await this.modules.points.savePoints(userCode, sessionPoints, this.state.gameScores);
     }
 
-    // 3. A goodbye képernyőnek átadjuk az értékeket
-    await this.showScreen('goodbye', {
-        points: sessionPoints,
-        code: userCode
-    });
+    // 3. A goodbye képernyőt jelenítjük meg
+    await this.showScreen('goodbye');
 
     // ★★★ KILÉPÉS UTÁN NEM NULLÁZZUK A STATE-ET! ★★★
     // A következő belépéskor az intro képernyő úgyis nullázza.
