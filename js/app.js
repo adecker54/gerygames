@@ -245,8 +245,10 @@ export class App {
                 // ★★★ HASZNÁLD A GLOBÁLIS VÁLTOZÓT! ★★★
                 // új törlés const points = window._goodbyeData?.points || 0;
                 // új törlés const code = window._goodbyeData?.code || '----';
-        
-                this.showScreen('goodbye', { points: points, code: code });
+                // új törlés this.showScreen('goodbye', { points: points, code: code });
+            // ★★★ A _goodbyeData-BÓL OLVASSUK KI AZ ADATOKAT! ★★★
+            const data = this._goodbyeData || { points: 0, code: '----' };
+            this.showScreen('goodbye', data);
             });
         }
     }
@@ -571,6 +573,10 @@ initGoodbyeScreen() {
     const pointsDisplay = screen.querySelector('.points-display');
     const codeDisplay = screen.querySelector('.code-display');
     const dateDisplay = screen.querySelector('.date-display');
+
+    // ★★★ HA A data ÜRES, HASZNÁLJUK A STATE-ET! ★★★
+    const points = data?.points ?? this.state.sessionPoints ?? 0;
+    const code = data?.code ?? this.state.userCode ?? '----';
 
     // ★★★ KIZÁRÓLAG A KAPOTT ADATOKAT HASZNÁLJUK A STATE-BŐL! ★★★
     if (pointsDisplay) {
