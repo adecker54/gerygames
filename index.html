@@ -244,9 +244,8 @@
                 currentGame: null,          // 1-4
                 language: 'hu',             // 'hu' | 'en' | 'de' | 'jp' | 'ru'
                 soundEnabled: true,
-                userCode: null,             // 6 karakteres kód
-                totalPoints: 0,             // Összesített pontszám (menetben)
-                sessionPoints: 0,           // Adott menetben elért pontok
+                userCode: null,             // 6 karakteres kód (első mezőbe beírt)
+                sessionPoints: 0,           // Adott menetben elért pontok (0-ról indul)
                 isCodeValid: false,
                 isLoggedIn: false,
                 walletAddress: null,
@@ -258,9 +257,6 @@
                     { id: 3, name: 'Játék 3', image: 'game3.jpg', multiplier: 1, active: false },
                     { id: 4, name: 'Játék 4', image: 'game4.jpg', multiplier: 1, active: false }
                 ],
-                previousPoints: 0,          // Előzőleg mentett pontszám (a CSV-ből)
-                startTime: null,
-                endTime: null,
                 codeList: [],               // Az összes érvényes kód
                 pointsData: [],             // A points.csv tartalma
                 isAdmin: false              // Admin mód aktív?
