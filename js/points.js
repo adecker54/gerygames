@@ -204,7 +204,6 @@ export class PointsManager {
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             
-            // Pontos dinamikus fájlnév: points_backup_év-hónap-nap.csv (pl. points_backup_2026-09-09.csv)
             const year = nowDate.getFullYear();
             const month = String(nowDate.getMonth() + 1).padStart(2, '0');
             const day = String(nowDate.getDate()).padStart(2, '0');
@@ -219,13 +218,36 @@ export class PointsManager {
 
     // ---------- RANGLISTA MEGJELENÍTÉS ----------
     showRanking() {
-        // Pontszámok szerint csökkenő sorrend rendezése
-        const sorted = [...this.pointsData].sort((a, b) => b.points - a.points);
-        const top10 = sorted.slice(0, 10);
-        
         const currentCode = window.GeryApp?.state?.userCode;
         const currentSessionPoints = window.GeryApp?.state?.sessionPoints || 0;
         const lang = window.GeryApp?.modules?.language;
+
+        // 1. Adatok egységesítése és Map-be szervezése (kódonként a legmagasabb pontszám)
+        const allRecordsMap = new Map();
+        
+        if (this.pointsData) {
+            this.pointsData.forEach(r => {
+                const existing = allRecordsMap.get(r.code);
+                if (!existing || r.points > existing.points) {
+                    allRecordsMap.set(r.code, { ...r });
+                }
+            });
+        }
+
+        // 2. Aktuális session pontok integrálása a bejelentkezett kódra
+        if (currentCode) {
+            const existing = allRecordsMap.get(currentCode);
+            const effectivePoints = Math.max(existing ? existing.points : 0, currentSessionPoints);
+            allRecordsMap.set(currentCode, {
+                code: currentCode,
+                points: effectivePoints,
+                timestamp: existing && existing.points >= currentSessionPoints ? existing.timestamp : this.formatTimestamp(new Date())
+            });
+        }
+
+        // 3. Teljes lista rendezése pontszám szerint csökkenő sorrendbe
+        const sortedRecords = Array.from(allRecordsMap.values()).sort((a, b) => b.points - a.points);
+        const top10 = sortedRecords.slice(0, 10);
         
         let html = `
             <div class="modal-overlay active" id="ranking-modal">
@@ -256,40 +278,29 @@ export class PointsManager {
             });
         }
 
-        // Vizsgáljuk, hogy a játékos bent van-e a Top 10-ben
+        // 4. Ellenőrzés, hogy a felhasználó bent van-e a Top 10-ben
         let inTop10 = false;
         if (currentCode) {
             inTop10 = top10.some(r => r.code === currentCode);
         }
 
-        // Ha van 10 elem és nagyobb-e a 10. rekordnál, vagy még nincs 10 elem
+        // 5. Ha a játékosnak van pontja, de nincs a Top 10-ben, jelenítsük meg külön alatta a valós helyezésével (pl. #7)
         if (currentCode && currentSessionPoints > 0 && !inTop10) {
-            const tenthPoints = top10.length >= 10 ? top10[9].points : -1;
-            if (top10.length < 10 || currentSessionPoints > tenthPoints) {
-                // Számoljuk ki a pontos helyezését a teljes listában
-                const allRecords = [...sorted];
-                const existingIndex = allRecords.findIndex(r => r.code === currentCode);
-                if (existingIndex !== -1) {
-                    allRecords[existingIndex].points = Math.max(allRecords[existingIndex].points, currentSessionPoints);
-                } else {
-                    allRecords.push({ code: currentCode, points: currentSessionPoints, timestamp: this.formatTimestamp(new Date()) });
-                }
-                allRecords.sort((a, b) => b.points - a.points);
-                const rank = allRecords.findIndex(r => r.code === currentCode) + 1;
+            const userRank = sortedRecords.findIndex(r => r.code === currentCode) + 1;
+            const userRecord = sortedRecords.find(r => r.code === currentCode);
 
-                html += `
-                    <div class="rank-divider">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</div>
-                    <div style="margin-bottom:8px;font-weight:700;color:var(--brown-dark);font-size:0.85rem;">
-                        🎯 ${lang?.t('points_current') || 'Te'}
-                    </div>
-                    <div class="rank-item current">
-                        <span class="rank-pos">#${rank}</span>
-                        <span class="rank-code">${currentCode}</span>
-                        <span class="rank-points">${currentSessionPoints}</span>
-                        <span class="rank-time">${this.formatTimestamp(new Date())}</span>
-                    </div>
-                `;
-            }
+            html += `
+                <div class="rank-divider">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</div>
+                <div style="margin-bottom:8px;font-weight:700;color:var(--brown-dark);font-size:0.85rem;">
+                    🎯 ${lang?.t('points_current') || 'Te'}
+                </div>
+                <div class="rank-item current">
+                    <span class="rank-pos">#${userRank}</span>
+                    <span class="rank-code">${currentCode}</span>
+                    <span class="rank-points">${userRecord ? userRecord.points : currentSessionPoints}</span>
+                    <span class="rank-time">${userRecord ? userRecord.timestamp : this.formatTimestamp(new Date())}</span>
+                </div>
+            `;
         }
 
         html += `
