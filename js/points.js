@@ -7,33 +7,24 @@ export class PointsManager {
         this.codes = new Set();
         this.pointsData = [];
         this.currentCode = null;
-        this.currentPoints = 0;
         this.initialized = false;
-        this.dataLoaded = false;
     }
 
     async init() {
         try {
-            // 1. Kódszámok betöltése
             await this.loadCodes();
-            
-            // 2. Pontok betöltése
             await this.loadPoints();
-            
-            // 3. LocalStorage-ból visszatöltés (ha van félbeszakadt session)
             this.restoreFromLocalStorage();
 
             this.initialized = true;
             console.log(`✅ Pontkezelő inicializálva: ${this.codes.size} kód, ${this.pointsData.length} rekord`);
             return true;
-
         } catch (error) {
             console.error('❌ Hiba a pontkezelő betöltésekor:', error);
             return false;
         }
     }
 
-    // ---------- KÓDSZÁMOK BETÖLTÉSE ----------
     async loadCodes() {
         try {
             const response = await fetch('data/codes.txt');
@@ -46,61 +37,43 @@ export class PointsManager {
                 .filter(line => line.length === 6 && /^[A-Z0-9]{6}$/.test(line));
             
             this.codes = new Set(lines);
-            console.log(`📋 ${this.codes.size} kódszám betöltve`);
-            
-            // Mentés a globális állapotba
             if (window.GeryApp) {
                 window.GeryApp.state.codeList = Array.from(this.codes);
             }
             return true;
-
         } catch (error) {
-            console.error('❌ Hiba a kódszámok betöltésekor:', error);
-            // Fallback: próbáljuk a localStorage-t
             const saved = localStorage.getItem('gery_codes_backup');
             if (saved) {
                 try {
                     const codes = JSON.parse(saved);
                     this.codes = new Set(codes);
-                    console.log(`📋 ${this.codes.size} kód betöltve localStorage-ból (fallback)`);
                     return true;
                 } catch (e) {}
             }
-            // Ha nincs, akkor üres set
             this.codes = new Set();
             return false;
         }
     }
 
-    // ---------- PONTOK BETÖLTÉSE ----------
     async loadPoints() {
         try {
             const response = await fetch('data/points.csv');
             if (!response.ok) {
-                // Ha nincs fájl, kezdünk egy újat
-                console.log('ℹ️ points.csv nem található, új fájl lesz létrehozva');
                 this.pointsData = [];
                 return true;
             }
-            
             const text = await response.text();
             this.pointsData = this.parseCSV(text);
-            console.log(`📊 ${this.pointsData.length} pontrekord betöltve`);
-            
-            // Mentés a globális állapotba
             if (window.GeryApp) {
                 window.GeryApp.state.pointsData = this.pointsData;
             }
             return true;
-
         } catch (error) {
-            console.error('❌ Hiba a pontok betöltésekor:', error);
             this.pointsData = [];
             return false;
         }
     }
 
-    // ---------- CSV PARSER ----------
     parseCSV(text) {
         const lines = text.split('\n')
             .map(line => line.trim())
@@ -108,7 +81,6 @@ export class PointsManager {
         
         if (lines.length === 0) return [];
         
-        // Fejléc érzékelés
         const headerLine = lines[0];
         const hasHeader = headerLine.toLowerCase().includes('code') || 
                           headerLine.toLowerCase().includes('points') ||
@@ -127,11 +99,9 @@ export class PointsManager {
                 });
             }
         }
-        
         return result;
     }
 
-    // ---------- CSV GENERÁLÁS ----------
     generateCSV(data) {
         const header = 'code,points,timestamp';
         const rows = data.map(row => 
@@ -140,120 +110,76 @@ export class PointsManager {
         return [header, ...rows].join('\n');
     }
 
-    // ---------- KÓD ELLENŐRZÉS ----------
     validateCode(code) {
         const upperCode = code.toUpperCase().trim();
         const isValid = this.codes.has(upperCode);
         if (isValid) {
             this.currentCode = upperCode;
+            if (window.GeryApp) {
+                window.GeryApp.state.userCode = upperCode;
+                window.GeryApp.state.isCodeValid = true;
+            }
         }
         return isValid;
     }
 
-    // ---------- PONTOK BETÖLTÉSE KÓD ALAPJÁN ----------
-    loadPointsForCode(code) {
+    async savePoints(code, points) {
+        if (!code) return false;
+
         const upperCode = code.toUpperCase().trim();
-        const records = this.pointsData.filter(row => row.code === upperCode);
-    
-        // ★★★ CSAK A GLOBÁLIS ÁLLAPOTBA MENTJÜK AZ EDDIGI PONTOKAT, DE A sessionPoints-ot NEM ÁLLÍTJUK BE! ★★★
+        const now = new Date();
+        const timestamp = this.formatTimestamp(now);
+        
+        const newRecord = {
+            code: upperCode,
+            points: points,
+            timestamp: timestamp
+        };
+        
+        this.pointsData.push(newRecord);
+        this.saveToLocalStorage(upperCode, points, timestamp);
+        this.downloadCSV(now);
+        
         if (window.GeryApp) {
-            window.GeryApp.state.previousPoints = records.length > 0 ? records[records.length - 1].points : 0;
-            window.GeryApp.state.userCode = upperCode;
-            window.GeryApp.state.isCodeValid = true;
-            // ★★★ A sessionPoints MARADJON 0! ★★★
+            window.GeryApp.state.pointsData = this.pointsData;
         }
-    
-        console.log(`📊 Kód: ${upperCode}, eddigi pontok: ${records.length > 0 ? records[records.length - 1].points : 0}`);
-        return records.length > 0 ? records[records.length - 1].points : 0;
+        
+        console.log(`💾 Pontok mentve: ${upperCode} → ${points} pont (${timestamp})`);
+        return true;
     }
 
-    // ---------- PONTOK MENTÉSE ----------
-    async savePoints(code, points, gameScores) {
-    if (!code) {
-        console.warn('⚠️ Nincs kódszám a mentéshez');
-        return false;
+    formatTimestamp(date) {
+        const romanMonths = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+        const year = date.getFullYear();
+        const month = romanMonths[date.getMonth()];
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${year}. ${month}. ${day}. ${hours}:${minutes}`;
     }
 
-    const upperCode = code.toUpperCase().trim();
-    const now = new Date();
-    const timestamp = this.formatTimestamp(now);
-    
-    // 1. Új rekord létrehozása (ÉS CSAK ÚJ REKORD!)
-    const newRecord = {
-        code: upperCode,
-        points: points,          // ← A SESSION PONTOKAT RÖGZÍTJÜK
-        timestamp: timestamp
-    };
-    
-    // 2. Hozzáadás a ponthoz
-    this.pointsData.push(newRecord);
-    
-    // 3. Mentés localStorage-ba (backup)
-    this.saveToLocalStorage(upperCode, points, timestamp);
-    
-    // 4. CSV letöltés (opcionális)
-    this.downloadCSV();
-    
-    // 5. Frissítés a globális állapotban
-    if (window.GeryApp) {
-        window.GeryApp.state.pointsData = this.pointsData;
-    }
-    
-    console.log(`💾 Pontok mentve: ${upperCode} → ${points} pont (${timestamp})`);
-    
-    // 6. Kísérlet a szerverre küldésre (ha van API)
-    await this.sendToServer(upperCode, points, timestamp);
-    
-    return true;
-    }
-
-    // ---------- IDŐPONT FORMAZÁS ----------
-formatTimestamp(date) {
-    // Római számok a hónapokhoz (független a nyelvtől)
-    const romanMonths = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
-    
-    const year = date.getFullYear();
-    const month = romanMonths[date.getMonth()];
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    
-    return `${year}. ${month}. ${day}. ${hours}:${minutes}`;
-}
-
-    // ---------- LOCALSTORAGE MENTÉS ----------
     saveToLocalStorage(code, points, timestamp) {
         try {
             const key = `gery_points_${code}`;
-            const data = {
-                code,
-                points,
-                timestamp,
-                lastUpdate: Date.now()
-            };
+            const data = { code, points, timestamp, lastUpdate: Date.now() };
             localStorage.setItem(key, JSON.stringify(data));
             
-            // Globális pontlista mentése
             const allPoints = JSON.parse(localStorage.getItem('gery_all_points') || '[]');
             allPoints.push(data);
             localStorage.setItem('gery_all_points', JSON.stringify(allPoints));
-            
-            // Kódok backup
             localStorage.setItem('gery_codes_backup', JSON.stringify(Array.from(this.codes)));
-            
         } catch (e) {
             console.warn('⚠️ LocalStorage mentés sikertelen:', e);
         }
     }
 
-    // ---------- LOCALSTORAGE VISSZATÖLTÉS ----------
     restoreFromLocalStorage() {
         try {
             const saved = localStorage.getItem('gery_all_points');
             if (saved) {
                 const data = JSON.parse(saved);
                 if (data.length > 0) {
-                    // Összefésülés a meglévő adatokkal
                     const existingCodes = new Set(this.pointsData.map(r => r.code));
                     data.forEach(item => {
                         if (!existingCodes.has(item.code)) {
@@ -264,7 +190,6 @@ formatTimestamp(date) {
                             });
                         }
                     });
-                    console.log(`🔄 ${data.length} rekord visszatöltve localStorage-ból`);
                 }
             }
         } catch (e) {
@@ -272,14 +197,19 @@ formatTimestamp(date) {
         }
     }
 
-    // ---------- CSV LETÖLTÉS ----------
-    downloadCSV() {
+    downloadCSV(nowDate = new Date()) {
         try {
             const csv = this.generateCSV(this.pointsData);
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `points_backup_${new Date().toISOString().slice(0,10)}.csv`;
+            
+            // Pontos dinamikus fájlnév: points_backup_év-hónap-nap.csv (pl. points_backup_2026-09-09.csv)
+            const year = nowDate.getFullYear();
+            const month = String(nowDate.getMonth() + 1).padStart(2, '0');
+            const day = String(nowDate.getDate()).padStart(2, '0');
+            link.download = `points_backup_${year}-${month}-${day}.csv`;
+            
             link.click();
             URL.revokeObjectURL(link.href);
         } catch (e) {
@@ -287,126 +217,66 @@ formatTimestamp(date) {
         }
     }
 
-    // ---------- SZERVERRE KÜLDÉS (API) ----------
-    async sendToServer(code, points, timestamp) {
-        try {
-            const response = await fetch('/api/save-points', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    code: code,
-                    points: points,
-                    timestamp: timestamp
-                })
-            });
-            
-            if (response.ok) {
-                console.log('📤 Pontok elküldve a szerverre');
-            } else {
-                console.warn('⚠️ Szerver mentés sikertelen (HTTP ' + response.status + ')');
-            }
-        } catch (e) {
-            // Szerver nem elérhető - ez normális, ha nincs backend
-            console.log('ℹ️ Szerver nem elérhető (backend nélkül is működik)');
-        }
-    }
-
     // ---------- RANGLISTA MEGJELENÍTÉS ----------
     showRanking() {
-    // 1. Rendezés pontszám szerint csökkenő sorrendbe
-    const sorted = [...this.pointsData].sort((a, b) => b.points - a.points);
-    
-    // 2. Top 10 rekord
-    const top10 = sorted.slice(0, 10);
-    
-    // 3. Globális változók lekérése
-    // Aktuális játékos keresése
-
-    const currentCode = window.GeryApp?.state?.userCode;
-    const currentSessionPoints = window.GeryApp?.state?.sessionPoints || 0;
-    
-    // ★★★ MINDIG HOZZUNK LÉTRE "TE" SORT, HA A JÁTÉKOS BE VAN JELENTKEZVE! ★★★
-    let currentRecord = null;
-    let currentInTop10 = false;
-
-    if (currentCode) {
-        const existingRecord = sorted.find(r => r.code === currentCode);
-        const displayPoints = Math.max(currentSessionPoints, existingRecord?.points || 0);
-    
-        // MINDIG létrehozzuk a rekordot, ha a játékos be van jelentkezve
-        currentRecord = {
-            code: currentCode,
-            points: displayPoints,
-            timestamp: existingRecord?.timestamp || this.formatTimestamp(new Date())
-        };
-    
-        // Ellenőrizzük, hogy benne van-e a top 10-ben
-        currentInTop10 = top10.some(r => r.code === currentCode && r.points >= currentRecord.points);
-        // ★★★ HA A JÁTÉKOS PONTJAI ELÉRIK A TOP 10 SZINTJÉT, AKKOR IGAZ! ★★★
-        if (!currentInTop10 && currentRecord) {
-        // Ellenőrizzük, hogy a játékos pontjai nagyobbak-e, mint a 10. helyezetté
-        if (top10.length === 10 && currentRecord.points > top10[9].points) {
-            currentInTop10 = true;
-        }
-    }
-}    
-    // 4. Nyelvi segédváltozó
-    const lang = window.GeryApp?.modules?.language;
-    
-    // 5. HTML felépítése
-    let html = `
-        <div class="modal-overlay active" id="ranking-modal">
-            <div class="modal-box">
-                <div class="modal-header">
-                    <h3>🏆 ${lang?.t('points_title') || 'Ranglista'}</h3>
-                    <button class="modal-close" onclick="document.getElementById('ranking-modal').remove()">✕</button>
-                </div>
-                <div class="modal-body">
-                    <div style="margin-bottom:12px;font-weight:700;color:var(--brown-dark);">
-                        ${lang?.t('points_top10') || 'Top 10'}
-                    </div>
-    `;
-
-    // 6. Top 10 listázása
-    if (top10.length === 0) {
-        html += `<div class="rank-empty">${lang?.t('points_empty') || 'Még nincs pontszám'}</div>`;
-    } else {
-        top10.forEach((record, index) => {
-            // ★★★ ITT A VÁLTOZÁS: A játékos akkor van a top 10-ben, ha a CODE egyezik ★★★
-            const isCurrent = record.code === currentCode;
-            html += `
-                <div class="rank-item ${isCurrent ? 'current' : ''}">
-                    <span class="rank-pos">#${index + 1}</span>
-                    <span class="rank-code">${record.code}</span>
-                    <span class="rank-points">${record.points}</span>
-                    <span class="rank-time">${record.timestamp}</span>
-                </div>
-            `;
-        });
-    }
-
-    // 7. "TE" sor hozzáadása (CSAK HA NINCS A TOP 10-BEN, DE VAN PONTJA!)
-    if (currentCode && currentSessionPoints > 0) {
-        // Ellenőrizzük, hogy a játékos benne van-e a top 10-ben
-        const isInTop10 = top10.some(r => r.code === currentCode);
+        // Pontszámok szerint csökkenő sorrend rendezése
+        const sorted = [...this.pointsData].sort((a, b) => b.points - a.points);
+        const top10 = sorted.slice(0, 10);
         
-        // ★★★ HA NINCS A TOP 10-BEN, AKKOR JELENÍTJÜK MEG A "TE" SORT ★★★
-        if (!isInTop10) {
-            // Számoljuk ki a helyezést (a teljes lista alapján)
-            const allRecords = [...sorted];
-            const existing = allRecords.find(r => r.code === currentCode);
-            if (existing) {
-                const idx = allRecords.indexOf(existing);
-                allRecords[idx] = { ...existing, points: Math.max(existing.points, currentSessionPoints) };
-            } else {
-                allRecords.push({ code: currentCode, points: currentSessionPoints, timestamp: this.formatTimestamp(new Date()) });
-            }
-            allRecords.sort((a, b) => b.points - a.points);
-            const rank = allRecords.findIndex(r => r.code === currentCode) + 1;
-            
-            if (rank > 0) {
+        const currentCode = window.GeryApp?.state?.userCode;
+        const currentSessionPoints = window.GeryApp?.state?.sessionPoints || 0;
+        const lang = window.GeryApp?.modules?.language;
+        
+        let html = `
+            <div class="modal-overlay active" id="ranking-modal">
+                <div class="modal-box">
+                    <div class="modal-header">
+                        <h3>🏆 ${lang?.t('points_title') || 'Ranglista'}</h3>
+                        <button class="modal-close" onclick="document.getElementById('ranking-modal').remove()">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div style="margin-bottom:12px;font-weight:700;color:var(--brown-dark);">
+                            ${lang?.t('points_top10') || 'Top 10'}
+                        </div>
+        `;
+
+        if (top10.length === 0) {
+            html += `<div class="rank-empty">${lang?.t('points_empty') || 'Még nincs pontszám'}</div>`;
+        } else {
+            top10.forEach((record, index) => {
+                const isCurrent = record.code === currentCode;
+                html += `
+                    <div class="rank-item ${isCurrent ? 'current' : ''}">
+                        <span class="rank-pos">#${index + 1}</span>
+                        <span class="rank-code">${record.code}</span>
+                        <span class="rank-points">${record.points}</span>
+                        <span class="rank-time">${record.timestamp}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Vizsgáljuk, hogy a játékos bent van-e a Top 10-ben
+        let inTop10 = false;
+        if (currentCode) {
+            inTop10 = top10.some(r => r.code === currentCode);
+        }
+
+        // Ha van 10 elem és nagyobb-e a 10. rekordnál, vagy még nincs 10 elem
+        if (currentCode && currentSessionPoints > 0 && !inTop10) {
+            const tenthPoints = top10.length >= 10 ? top10[9].points : -1;
+            if (top10.length < 10 || currentSessionPoints > tenthPoints) {
+                // Számoljuk ki a pontos helyezését a teljes listában
+                const allRecords = [...sorted];
+                const existingIndex = allRecords.findIndex(r => r.code === currentCode);
+                if (existingIndex !== -1) {
+                    allRecords[existingIndex].points = Math.max(allRecords[existingIndex].points, currentSessionPoints);
+                } else {
+                    allRecords.push({ code: currentCode, points: currentSessionPoints, timestamp: this.formatTimestamp(new Date()) });
+                }
+                allRecords.sort((a, b) => b.points - a.points);
+                const rank = allRecords.findIndex(r => r.code === currentCode) + 1;
+
                 html += `
                     <div class="rank-divider">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</div>
                     <div style="margin-bottom:8px;font-weight:700;color:var(--brown-dark);font-size:0.85rem;">
@@ -421,46 +291,40 @@ formatTimestamp(date) {
                 `;
             }
         }
-    }
 
-    html += `
+        html += `
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
 
-    // 8. Modal beszúrása a DOM-ba
-    const modalContainer = document.createElement('div');
-    modalContainer.innerHTML = html;
-    document.body.appendChild(modalContainer.firstElementChild);
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = html;
+        document.body.appendChild(modalContainer.firstElementChild);
 
-    // 9. Bezárás eseménykezelő
-    document.querySelector('#ranking-modal .modal-close')?.addEventListener('click', () => {
-        document.getElementById('ranking-modal')?.remove();
-    });
+        document.querySelector('#ranking-modal .modal-close')?.addEventListener('click', () => {
+            document.getElementById('ranking-modal')?.remove();
+        });
 
-    document.getElementById('ranking-modal')?.addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) {
-            e.target.remove();
-        }
-    });
-}
-
-    // ---------- AKTUÁLIS PONTSZÁM LEKÉRÉSE ----------
-    getCurrentTotal() {
-        return window.GeryApp?.state?.totalPoints || 0;
+        document.getElementById('ranking-modal')?.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                e.target.remove();
+            }
+        });
     }
 
-    // ---------- PONTSZÁM HOZZÁADÁSA (játék végén) ----------
+    getCurrentTotal() {
+        return window.GeryApp?.state?.sessionPoints || 0;
+    }
+
     addPoints(points) {
         if (window.GeryApp) {
-            window.GeryApp.state.totalPoints += points;
-            // Pont gomb frissítése
+            window.GeryApp.state.sessionPoints += points;
             const label = document.querySelector('#btn-points .label');
             if (label) {
-                label.textContent = window.GeryApp.state.totalPoints.toString();
+                label.textContent = window.GeryApp.state.sessionPoints.toString();
             }
         }
-        return window.GeryApp?.state?.totalPoints || 0;
+        return window.GeryApp?.state?.sessionPoints || 0;
     }
 }
