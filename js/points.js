@@ -222,32 +222,26 @@ export class PointsManager {
         const currentSessionPoints = window.GeryApp?.state?.sessionPoints || 0;
         const lang = window.GeryApp?.modules?.language;
 
-        // 1. Adatok egységesítése és Map-be szervezése (kódonként a legmagasabb pontszám)
-        const allRecordsMap = new Map();
-        
+        // 1. Összegyűjtjük az összes meglévő rekordot
+        const allRecords = [];
         if (this.pointsData) {
             this.pointsData.forEach(r => {
-                const existing = allRecordsMap.get(r.code);
-                if (!existing || r.points > existing.points) {
-                    allRecordsMap.set(r.code, { ...r });
-                }
+                allRecords.push({ ...r });
             });
         }
 
-        // 2. Aktuális session pontok integrálása a bejelentkezett kódra
-        if (currentCode) {
-            const existing = allRecordsMap.get(currentCode);
-            const effectivePoints = Math.max(existing ? existing.points : 0, currentSessionPoints);
-            allRecordsMap.set(currentCode, {
+        // 2. Ha a játékos játszott ebben a sessionben, hozzáadjuk mint aktív kísérletet
+        if (currentCode && currentSessionPoints > 0) {
+            allRecords.push({
                 code: currentCode,
-                points: effectivePoints,
-                timestamp: existing && existing.points >= currentSessionPoints ? existing.timestamp : this.formatTimestamp(new Date())
+                points: currentSessionPoints,
+                timestamp: this.formatTimestamp(new Date())
             });
         }
 
-        // 3. Teljes lista rendezése pontszám szerint csökkenő sorrendbe
-        const sortedRecords = Array.from(allRecordsMap.values()).sort((a, b) => b.points - a.points);
-        const top10 = sortedRecords.slice(0, 10);
+        // 3. Rendezés pontszám szerint csökkenő sorrendbe
+        allRecords.sort((a, b) => b.points - a.points);
+        const top10 = allRecords.slice(0, 10);
         
         let html = `
             <div class="modal-overlay active" id="ranking-modal">
@@ -266,7 +260,7 @@ export class PointsManager {
             html += `<div class="rank-empty">${lang?.t('points_empty') || 'Még nincs pontszám'}</div>`;
         } else {
             top10.forEach((record, index) => {
-                const isCurrent = record.code === currentCode;
+                const isCurrent = record.code === currentCode && record.points === currentSessionPoints;
                 html += `
                     <div class="rank-item ${isCurrent ? 'current' : ''}">
                         <span class="rank-pos">#${index + 1}</span>
@@ -278,16 +272,17 @@ export class PointsManager {
             });
         }
 
-        // 4. Ellenőrzés, hogy a felhasználó bent van-e a Top 10-ben
+        // 4. Ellenőrzés, hogy az aktuális session benne van-e a Top 10-ben
         let inTop10 = false;
-        if (currentCode) {
-            inTop10 = top10.some(r => r.code === currentCode);
+        if (currentCode && currentSessionPoints > 0) {
+            inTop10 = top10.some(r => r.code === currentCode && r.points === currentSessionPoints);
         }
 
-        // 5. Ha a játékosnak van pontja, de nincs a Top 10-ben, jelenítsük meg külön alatta a valós helyezésével (pl. #7)
+        // 5. Ha van pontja, de nincs a Top 10-ben, külön kiírjuk alulra a pontos helyezésével (pl. #7)
         if (currentCode && currentSessionPoints > 0 && !inTop10) {
-            const userRank = sortedRecords.findIndex(r => r.code === currentCode) + 1;
-            const userRecord = sortedRecords.find(r => r.code === currentCode);
+            const userIndex = allRecords.findIndex(r => r.code === currentCode && r.points === currentSessionPoints);
+            const userRank = userIndex !== -1 ? userIndex + 1 : '-';
+            const userRecord = allRecords[userIndex] || { code: currentCode, points: currentSessionPoints, timestamp: this.formatTimestamp(new Date()) };
 
             html += `
                 <div class="rank-divider">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</div>
@@ -296,9 +291,9 @@ export class PointsManager {
                 </div>
                 <div class="rank-item current">
                     <span class="rank-pos">#${userRank}</span>
-                    <span class="rank-code">${currentCode}</span>
-                    <span class="rank-points">${userRecord ? userRecord.points : currentSessionPoints}</span>
-                    <span class="rank-time">${userRecord ? userRecord.timestamp : this.formatTimestamp(new Date())}</span>
+                    <span class="rank-code">${userRecord.code}</span>
+                    <span class="rank-points">${userRecord.points}</span>
+                    <span class="rank-time">${userRecord.timestamp}</span>
                 </div>
             `;
         }
