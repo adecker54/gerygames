@@ -8,6 +8,7 @@ export class PointsManager {
         this.pointsData = [];
         this.currentCode = null;
         this.initialized = false;
+        this.hasSavedCurrentSession = false; // Duplikáció elleni védelem jelzője
     }
 
     async init() {
@@ -115,6 +116,7 @@ export class PointsManager {
         const isValid = this.codes.has(upperCode);
         if (isValid) {
             this.currentCode = upperCode;
+            this.hasSavedCurrentSession = false; // Új kód/session esetén engedélyezzük a mentést
             if (window.GeryApp) {
                 window.GeryApp.state.userCode = upperCode;
                 window.GeryApp.state.isCodeValid = true;
@@ -129,6 +131,19 @@ export class PointsManager {
         const upperCode = code.toUpperCase().trim();
         const now = new Date();
         const timestamp = this.formatTimestamp(now);
+        const todayDateStr = timestamp.substring(0, 12); // Év. Hó. Nap. rész a duplikáció szűréshez
+
+        // Ellenőrzés: ha a mai napon ezzel a kóddal és pontszámmal már történt rögzítés, ne mentse újra
+        const alreadyExists = this.pointsData.some(r => 
+            r.code === upperCode && 
+            r.points === points && 
+            r.timestamp.startsWith(todayDateStr)
+        );
+
+        if (alreadyExists || this.hasSavedCurrentSession) {
+            console.log(`ℹ️ Ezt az eredményt (${upperCode} - ${points}) erre a napra már rögzítettük, duplikáció kihagyva.`);
+            return false;
+        }
         
         const newRecord = {
             code: upperCode,
@@ -137,6 +152,8 @@ export class PointsManager {
         };
         
         this.pointsData.push(newRecord);
+        this.hasSavedCurrentSession = true; // Megjelöljük, hogy ebben a sessionben megtörtént a mentés
+        
         this.saveToLocalStorage(upperCode, points, timestamp);
         this.downloadCSV(now);
         
@@ -222,7 +239,6 @@ export class PointsManager {
         const currentSessionPoints = window.GeryApp?.state?.sessionPoints || 0;
         const lang = window.GeryApp?.modules?.language;
 
-        // 1. Összegyűjtjük az összes meglévő rekordot
         const allRecords = [];
         if (this.pointsData) {
             this.pointsData.forEach(r => {
@@ -230,8 +246,15 @@ export class PointsManager {
             });
         }
 
-        // 2. Ha a játékos játszott ebben a sessionben, hozzáadjuk mint aktív kísérletet
-        if (currentCode && currentSessionPoints > 0) {
+        // Csak akkor adjuk hozzá ideiglenesen a listához, ha még nem mentettük le, és van pontja
+        const todayDateStr = this.formatTimestamp(new Date()).substring(0, 12);
+        const alreadySavedToday = allRecords.some(r => 
+            r.code === currentCode && 
+            r.points === currentSessionPoints && 
+            r.timestamp.startsWith(todayDateStr)
+        );
+
+        if (currentCode && currentSessionPoints > 0 && !this.hasSavedCurrentSession && !alreadySavedToday) {
             allRecords.push({
                 code: currentCode,
                 points: currentSessionPoints,
@@ -239,7 +262,6 @@ export class PointsManager {
             });
         }
 
-        // 3. Rendezés pontszám szerint csökkenő sorrendbe
         allRecords.sort((a, b) => b.points - a.points);
         const top10 = allRecords.slice(0, 10);
         
@@ -272,14 +294,12 @@ export class PointsManager {
             });
         }
 
-        // 4. Ellenőrzés, hogy az aktuális session benne van-e a Top 10-ben
         let inTop10 = false;
         if (currentCode && currentSessionPoints > 0) {
             inTop10 = top10.some(r => r.code === currentCode && r.points === currentSessionPoints);
         }
 
-        // 5. Ha van pontja, de nincs a Top 10-ben, külön kiírjuk alulra a pontos helyezésével (pl. #7)
-        if (currentCode && currentSessionPoints > 0 && !inTop10) {
+        if (currentCode && currentSessionPoints > 0 && !inTop10 && !this.hasSavedCurrentSession && !alreadySavedToday) {
             const userIndex = allRecords.findIndex(r => r.code === currentCode && r.points === currentSessionPoints);
             const userRank = userIndex !== -1 ? userIndex + 1 : '-';
             const userRecord = allRecords[userIndex] || { code: currentCode, points: currentSessionPoints, timestamp: this.formatTimestamp(new Date()) };
