@@ -1,5 +1,5 @@
 // ================================================================
-// GAME5.JS - Kő-Papír-Olló Geryvel (5. Játék - Többnyelvű verzió)
+// GAME5.JS - Kő-Papír-Olló Geryvel (5. Játék - Teljesen többnyelvű)
 // ================================================================
 
 export class Game5 {
@@ -78,7 +78,11 @@ export class Game5 {
         const choices = ['rock', 'paper', 'scissors'];
         const geryChoice = choices[Math.floor(Math.random() * choices.length)];
 
-        const emojis = { rock: '🪨 ' + (lang?.t('rock') || 'Kő'), paper: '📄 ' + (lang?.t('paper') || 'Papír'), scissors: '✂️ ' + (lang?.t('scissors') || 'Olló') };
+        const emojis = { 
+            rock: '🪨 ' + (lang?.t('rock') || 'Kő'), 
+            paper: '📄 ' + (lang?.t('paper') || 'Papír'), 
+            scissors: '✂️ ' + (lang?.t('scissors') || 'Olló') 
+        };
         
         let roundResultText = '';
         let roundPoints = 0;
