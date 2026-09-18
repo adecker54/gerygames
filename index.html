@@ -137,7 +137,7 @@
     <div class="links-container" style="max-height: 85vh; overflow-y: auto;">
         <h2 data-i18n="links_title">🌐 Szavazz Gery sikerére!</h2>
         <p data-i18n="links_intro">Kattints egymás után az alábbi linkekre, majd segíts a szavazatoddal Gery-nek!</p>
-        <p data-i18n="links_sub">Ezzel a célunk, hogy minél többen ismerjék meg Gery-t, a mi hegyi macskánkat. Minden szavazat számít. A szavazógomb általában a jobb oldalon lefelé görgetve érhető el.</p>
+        <p data-i18n="links_sub">Ezzel a célunk, hogy minél többen ismerjék meg Gery-t, a mi hegyimacskánkat. Minden szavazat számít. A szavazógomb általában a jobb oldalon lefelé görgetve érhető el.</p>
         <div class="links-list" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"> 
 
             <a href="https://www.freshcoins.io/coins/gery-the-mountain-cat/" target="_blank" rel="noopener noreferrer" class="link-btn">
@@ -176,6 +176,11 @@
                 <span class="link-status">⬜</span>
             </a>
 
+            <a href="https://pump.fun/coin/AJdPa4KYAwBkuKta5UsEX8x7fuLeCE6FqLSejG5rpump/" target="_blank" rel="noopener noreferrer" class="link-btn">
+                <span class="link-icon">🗣</span>
+                <span class="link-text">AdSlot</span>
+                <span class="link-status">⬜</span>
+            </a>
         </div>
 
         <button id="back-from-links-btn" class="back-btn" data-i18n="back_to_game">
@@ -242,7 +247,7 @@
         window.GeryApp = {
             state: {
                 currentScreen: 'intro',     // 'intro' | 'menu' | 'game' | 'goodbye'
-                currentGame: null,          // 1-4
+                currentGame: null,          // 1-5
                 language: 'hu',             // 'hu' | 'en' | 'de' | 'jp' | 'ru'
                 soundEnabled: true,
                 userCode: null,             // 6 karakteres kód (első mezőbe beírt)
@@ -250,8 +255,8 @@
                 isCodeValid: false,
                 isLoggedIn: false,
                 walletAddress: null,
-                gameScores: [0, 0, 0, 0],   // Az egyes játékokban elért pontok
-                gameMultipliers: [0, 0, 0, 0], // Az egyes játékok szorzói
+                gameScores: [0, 0, 0, 0, 0],   // Az egyes játékokban elért pontok
+                gameMultipliers: [0, 0, 0, 0, 0], // Az egyes játékok szorzói
                 games: [
                     { id: 1, name: 'Játék 1', image: 'game1.jpg', multiplier: 1, active: false },
                     { id: 2, name: 'Játék 2', image: 'game2.jpg', multiplier: 1, active: false },
