@@ -22,7 +22,7 @@ export class Game1 {
         if (!container) return;
 
         const lang = window.GeryApp?.modules?.language;
-        const gameName = lang?.t('game_name_1') || 'Ügyességi játék 1';
+        const gameName = lang?.t('game_name_1') || 'Ügyességi játék';
         const multiplier = gameData?.multiplier || 1;
 
         // Játék UI
@@ -42,11 +42,11 @@ export class Game1 {
                         🎯
                     </div>
                     <div style="font-size:1.2rem;text-align:center;color:var(--brown-dark);">
-                        ${lang?.t('game_name_1') || 'Ügyességi játék 1'} - 
+                        ${lang?.t('game_name_1') || 'Ügyességi játék'} - 
                         ${lang?.t('multiplier_label') || 'Szorzó:'} ×${multiplier}
                     </div>
                     <div style="font-size:0.9rem;text-align:center;color:var(--gray-medium);">
-                        Kattints a gombra pontot szerezni!
+                        ${lang?.t('game_text_1') || 'Kattints a gombra pontot szerezni!'}
                     </div>
                     <div id="game1-score" style="font-size:2rem;font-weight:700;color:var(--brown-dark);">
                         0
@@ -84,7 +84,7 @@ export class Game1 {
             </div>
         `;
 
-        // Elemet mentése
+        // Elemek mentése
         this.elements = {
             scoreDisplay: document.getElementById('game1-score'),
             clickBtn: document.getElementById('game1-click-btn'),
