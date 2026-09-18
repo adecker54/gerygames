@@ -26,10 +26,10 @@ export class Game5 {
         const lang = window.GeryApp?.modules?.language;
 
         const titleText = lang?.t('game5_title') || '🐾 Kő - Papír - Olló Geryvel';
-        const subtitleText = lang?.t('game5_subtitle') || 'Győzd le Geryt, a hegyi macskát 3 körben!';
+        const subtitleText = lang?.t('game5_subtitle') || 'Győzd le Geryt, a hegyi macskát 3 menetben!';
         const statusText = `${this.round}. ${lang?.t('game5_round_label') || 'kör'} / ${this.maxRounds} - ${lang?.t('game5_choose_prompt') || 'Válassz egy lehetőséget!'}`;
         const readyText = lang?.t('game5_ready') || 'Készülj a játékra! Kattints a gombok egyikére.';
-        const exitBtnText = lang?.t('game5_exit_btn') || 'Eredmény mentése és visszatérés';
+        const exitBtnText = lang?.t('game5_exit_btn') || 'Vissza';
 
         screen.innerHTML = `
             <div class="game-wrapper" style="text-align:center; padding: 20px; margin-top: 70px; max-width: 500px; margin-left: auto; margin-right: auto; box-sizing: border-box;">
@@ -93,14 +93,14 @@ export class Game5 {
             (playerChoice === 'scissors' && geryChoice === 'paper');
 
         if (playerChoice === geryChoice) {
-            roundResultText = lang?.t('game5_draw') || `🤝 Döntetlen! Gery is ezt választotta: ${emojis[geryChoice]}.`;
+            roundResultText = lang?.t('game5_draw') || `🤝 Döntetlen!`;
             roundPoints = 5;
         } else if (isWin) {
-            roundResultText = lang?.t('game5_win') || `🎉 Nyertél ebben a körben! Gery választása: ${emojis[geryChoice]}.`;
+            roundResultText = lang?.t('game5_win') || `🎉 Nyertél ebben a körben!`;
             roundPoints = 15;
             this.playerWins++;
         } else {
-            roundResultText = lang?.t('game5_lose') || `😿 Gery nyerte ezt a kört! Ő ezt választotta: ${emojis[geryChoice]}.`;
+            roundResultText = lang?.t('game5_lose') || `😿 Gery nyerte ezt a kört!`;
             this.geryWins++;
         }
 
