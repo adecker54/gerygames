@@ -84,7 +84,7 @@ export class Game1 {
             </div>
         `;
 
-        // Elemek mentése
+        // Elemek elmentése
         this.elements = {
             scoreDisplay: document.getElementById('game1-score'),
             clickBtn: document.getElementById('game1-click-btn'),
