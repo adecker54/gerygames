@@ -101,7 +101,7 @@ export class Game2 {
                         </button>
                     </div>
                     <div style="font-size:0.85rem;color:var(--gray-light);text-align:center;">
-                        ${lang?.t('game_name_text_2') || 'Kattints a célpontra!'}
+                        ${lang?.t('game_text_2') || 'Kattints a célpontra!'}
                     </div>
                 </div>
             </div>
