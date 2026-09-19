@@ -31,7 +31,7 @@ export class Game2 {
 
         const lang = window.GeryApp?.modules?.language;
         const gameName = lang?.t('game_name_2') || 'Kapd el a labdát!';
-        const gameNameAddition = lang?.t('game_name_2addit') || 'Kattints a célpontra!';
+        const gameNameText = lang?.t('game_text_2') || 'Kattints a célpontra!';
         const multiplier = gameData?.multiplier || 1;
 
         container.innerHTML = `
@@ -101,7 +101,7 @@ export class Game2 {
                         </button>
                     </div>
                     <div style="font-size:0.85rem;color:var(--gray-light);text-align:center;">
-                        ${lang?.t('game_name_2addit') || 'Kattints a célpontra!'}
+                        ${lang?.t('game_name_text_2') || 'Kattints a célpontra!'}
                     </div>
                 </div>
             </div>
