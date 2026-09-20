@@ -26,7 +26,7 @@ export class Game4 {
         if (!container) return;
 
         const lang = window.GeryApp?.modules?.language;
-        const gameName = lang?.t('game_name_4') || 'Szerencsejáték 2';
+        const gameName = lang?.t('game_name_4') || 'Kártyajáték';
         const multiplier = gameData?.multiplier || 1;
 
         container.innerHTML = `
@@ -43,10 +43,9 @@ export class Game4 {
                 <div class="game-content" style="flex-direction:column;gap:16px;">
                     <div style="text-align:center;">
                         <div style="font-size:0.9rem;color:var(--gray-medium);">
-                            🃏 ${lang?.t('game_name_4') || 'Szerencsejáték 2'}
+                            🃏 ${lang?.t('game_name_4') || 'Kártyajáték'}
                         </div>
-                        <div style="font-size:0.85rem;color:var(--gray-light);">
-                            ${this.draws}/${this.totalDraws} húzás
+                        <div id="game4-draws" style="font-size:0.85rem;color:var(--gray-light);"> 0/${this.totalDraws} ${lang?.t('game_text_4') || 'húzás'}
                         </div>
                     </div>
                     <div id="game4-card-display" style="
@@ -108,6 +107,7 @@ export class Game4 {
         this.elements = {
             cardDisplay: document.getElementById('game4-card-display'),
             score: document.getElementById('game4-score'),
+            draws: document.getElementById('game4-draws'),
             drawBtn: document.getElementById('game4-draw-btn'),
             finishBtn: document.getElementById('game4-finish-btn'),
             exitBtn: container.querySelector('.game-exit-btn')
@@ -135,7 +135,10 @@ export class Game4 {
         if (sound) sound.playClick();
 
         this.draws++;
-
+        const lang = window.GeryApp?.modules?.language;
+        if (this.elements.draws) {
+            this.elements.draws.textContent = `${this.draws}/${this.totalDraws} ${lang?.t('game_text_4') || 'húzás'}`;
+        }
         // Kártya húzás
         const suit = this.cards[Math.floor(Math.random() * this.cards.length)];
         const value = this.values[Math.floor(Math.random() * this.values.length)];
@@ -178,7 +181,7 @@ export class Game4 {
         // Gomb szövegének frissítése
         if (this.draws >= this.totalDraws) {
             const lang = window.GeryApp?.modules?.language;
-            this.elements.drawBtn.textContent = `🎯 ${lang?.t('exit_confirm') || 'Befejezés'}`;
+            this.elements.drawBtn.textContent = `🎯 ${lang?.t('exit_confirm') || 'Vissza'}`;
         }
 
         console.log(`🃏 Húzás ${this.draws}/${this.totalDraws}: ${value}${suit} = ${points} pont`);
