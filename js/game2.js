@@ -97,7 +97,7 @@ export class Game2 {
                             cursor:pointer;
                             font-size:1rem;
                         ">
-                            ⏹ ${lang?.t('exit_confirm') || 'Befejezés'}
+                            ⏹ ${lang?.t('exit_confirm') || 'Vissza'}
                         </button>
                     </div>
                     <div style="font-size:0.85rem;color:var(--gray-light);text-align:center;">

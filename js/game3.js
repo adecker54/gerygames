@@ -23,9 +23,9 @@ export class Game3 {
         if (!container) return;
 
         const lang = window.GeryApp?.modules?.language;
-        const gameName = lang?.t('game_name_3') || 'Szerencsejáték 1';
+        const gameName = lang?.t('game_name_3') || 'Kockadobás';
         const multiplier = gameData?.multiplier || 1;
-
+        
         container.innerHTML = `
             <div class="game-container">
                 <div class="game-header">
@@ -40,10 +40,15 @@ export class Game3 {
                 <div class="game-content" style="flex-direction:column;gap:20px;">
                     <div style="text-align:center;">
                         <div style="font-size:1rem;color:var(--gray-medium);">
-                            🎲 ${lang?.t('game_name_3') || 'Szerencsejáték 1'}
+                            🎲 ${lang?.t('game_name_3') || 'Kockadobás'}
                         </div>
                         <div style="font-size:0.85rem;color:var(--gray-light);margin-top:4px;">
                             ${this.rolls}/${this.totalRolls} dobás
+
+<div id="game3-rolls" style="font-size:0.85rem;color:var(--gray-light);margin-top:4px;">
+    0/${this.totalRolls} dobás
+</div>
+
                         </div>
                     </div>
                     <div id="game3-dice-display" style="
@@ -89,7 +94,7 @@ export class Game3 {
                             cursor:pointer;
                             font-size:1rem;
                         ">
-                            ⏹ ${lang?.t('exit_confirm') || 'Befejezés'}
+                            ⏹ ${lang?.t('exit_confirm') || 'Vissza'}
                         </button>
                     </div>
                 </div>
@@ -103,6 +108,19 @@ export class Game3 {
             finishBtn: document.getElementById('game3-finish-btn'),
             exitBtn: container.querySelector('.game-exit-btn')
         };
+
+this.elements = {
+    diceDisplay: document.getElementById('game3-dice-display'),
+    score: document.getElementById('game3-score'),
+    rolls: document.getElementById('game3-rolls'),
+    rollBtn: document.getElementById('game3-roll-btn'),
+    finishBtn: document.getElementById('game3-finish-btn'),
+    exitBtn: container.querySelector('.game-exit-btn')
+};
+
+
+
+
 
         this.elements.rollBtn?.addEventListener('click', () => this.rollDice());
         this.elements.rollBtn?.addEventListener('touchstart', (e) => {
@@ -135,6 +153,11 @@ export class Game3 {
 
         this.rolls++;
 
+if (this.elements.rolls) {
+this.elements.rolls.textContent =
+    `${this.rolls}/${this.totalRolls} ${lang?.t('game_text_3') || 'dobás'}`;}
+
+
         // 5 kocka dobás
         const values = [];
         let total = 0;
@@ -166,7 +189,7 @@ export class Game3 {
         // Gomb szövegének frissítése
         if (this.rolls >= this.totalRolls) {
             const lang = window.GeryApp?.modules?.language;
-            this.elements.rollBtn.textContent = `🎯 ${lang?.t('exit_confirm') || 'Befejezés'}`;
+            this.elements.rollBtn.textContent = `🎯 ${lang?.t('exit_confirm') || 'Vissza'}`;
         }
 
         console.log(`🎲 Dobás ${this.rolls}/${this.totalRolls}: ${values.join(', ')} = ${total} pont`);
