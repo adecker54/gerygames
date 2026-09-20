@@ -119,10 +119,6 @@ this.elements = {
     exitBtn: container.querySelector('.game-exit-btn')
 };
 
-
-
-
-
         this.elements.rollBtn?.addEventListener('click', () => this.rollDice());
         this.elements.rollBtn?.addEventListener('touchstart', (e) => {
             e.preventDefault();
