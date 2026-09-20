@@ -42,13 +42,9 @@ export class Game3 {
                         <div style="font-size:1rem;color:var(--gray-medium);">
                             🎲 ${lang?.t('game_name_3') || 'Kockadobás'}
                         </div>
-//                        <div style="font-size:0.85rem;color:var(--gray-light);margin-top:4px;">
-//                            ${this.rolls}/${this.totalRolls} dobás
-
 
 <div id="game3-rolls" style="font-size:0.85rem;color:var(--gray-light);margin-top:4px;">
     0/${this.totalRolls} ${lang?.t('game_text_3') || 'dobás'}
-
 
                         </div>
                     </div>
@@ -102,14 +98,6 @@ export class Game3 {
             </div>
         `;
 
-//        this.elements = {
-//            diceDisplay: document.getElementById('game3-dice-display'),
-//            score: document.getElementById('game3-score'),
-//            rollBtn: document.getElementById('game3-roll-btn'),
-//            finishBtn: document.getElementById('game3-finish-btn'),
-//            exitBtn: container.querySelector('.game-exit-btn')
-//        };
-
 this.elements = {
     diceDisplay: document.getElementById('game3-dice-display'),
     score: document.getElementById('game3-score'),
@@ -147,6 +135,12 @@ this.elements = {
 
         const sound = window.GeryApp?.modules?.sound;
         if (sound) sound.playClick();
+
+const lang = window.GeryApp?.modules?.language;
+//if (this.elements.rolls) {
+//    this.elements.rolls.textContent =
+//        `${this.rolls}/${this.totalRolls} ${lang?.t('game_text_3') || 'dobás'}`;
+
 
         this.rolls++;
 
