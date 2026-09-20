@@ -42,12 +42,13 @@ export class Game3 {
                         <div style="font-size:1rem;color:var(--gray-medium);">
                             🎲 ${lang?.t('game_name_3') || 'Kockadobás'}
                         </div>
-                        <div style="font-size:0.85rem;color:var(--gray-light);margin-top:4px;">
-                            ${this.rolls}/${this.totalRolls} dobás
+//                        <div style="font-size:0.85rem;color:var(--gray-light);margin-top:4px;">
+//                            ${this.rolls}/${this.totalRolls} dobás
+
 
 <div id="game3-rolls" style="font-size:0.85rem;color:var(--gray-light);margin-top:4px;">
-    0/${this.totalRolls} dobás
-</div>
+    0/${this.totalRolls} ${lang?.t('game_text_3') || 'dobás'}
+
 
                         </div>
                     </div>
@@ -101,13 +102,13 @@ export class Game3 {
             </div>
         `;
 
-        this.elements = {
-            diceDisplay: document.getElementById('game3-dice-display'),
-            score: document.getElementById('game3-score'),
-            rollBtn: document.getElementById('game3-roll-btn'),
-            finishBtn: document.getElementById('game3-finish-btn'),
-            exitBtn: container.querySelector('.game-exit-btn')
-        };
+//        this.elements = {
+//            diceDisplay: document.getElementById('game3-dice-display'),
+//            score: document.getElementById('game3-score'),
+//            rollBtn: document.getElementById('game3-roll-btn'),
+//            finishBtn: document.getElementById('game3-finish-btn'),
+//            exitBtn: container.querySelector('.game-exit-btn')
+//        };
 
 this.elements = {
     diceDisplay: document.getElementById('game3-dice-display'),
@@ -153,9 +154,8 @@ this.elements = {
 
         this.rolls++;
 
-if (this.elements.rolls) {
-this.elements.rolls.textContent =
-    `${this.rolls}/${this.totalRolls} ${lang?.t('game_text_3') || 'dobás'}`;}
+        if (this.elements.rolls) {
+            this.elements.rolls.textContent = `${this.rolls}/${this.totalRolls} ${lang?.t('game_text_3') || 'dobás'}`;}
 
 
         // 5 kocka dobás
