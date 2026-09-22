@@ -1,5 +1,5 @@
 // ================================================================
-// GAME4.JS - Szerencsejáték 2 (kártya húzás) - Javítva
+// GAME4.JS - Szerencsejáték 2 (kártya húzás) - Javítva (0/5 kezdet)
 // ================================================================
 
 export class Game4 {
@@ -19,9 +19,7 @@ export class Game4 {
     start(gameData) {
         this.isRunning = true;
         this.score = 0;
-        this.draws = 0; // Itt 0, de a megjelenítésben az első húzáshoz igazítjuk, vagy indításkor 1-et mutatunk, ha az első körre utalunk. 
-        // Ha azt szeretnéd, hogy már nyitáskor az "1/5" legyen látható (mivel a játékra lépve az az első kísérlet), 
-        // akkor a draws-t indíthatjuk 0-ról, de a HTML-be 1/5-öt írunk, vagy alább beállítjuk:
+        this.draws = 0; // Kezdetben 0 húzás van
         this.lastCard = null;
 
         const container = document.getElementById('screen-game');
@@ -31,8 +29,8 @@ export class Game4 {
         const gameName = lang?.t('game_name_4') || 'Kártyajáték';
         const multiplier = gameData?.multiplier || 1;
 
-        // Kezdeti állapotban az 1. húzásra készen mutatjuk (1/5), mivel a játékos most kezdi el a sorozatot
-        const initialDrawsDisplay = `1/${this.totalDraws}`;
+        // Kezdeti állapot megjelenítése 0/5-tel
+        const initialDrawsDisplay = `${this.draws}/${this.totalDraws}`;
 
         container.innerHTML = `
             <div class="game-container">
@@ -132,7 +130,6 @@ export class Game4 {
     drawCard() {
         if (!this.isRunning) return;
         
-        // Ha már elértük vagy túlléptük a max húzást, kilépünk / befejezzük
         if (this.draws >= this.totalDraws) {
             this.finish();
             return;
@@ -143,10 +140,9 @@ export class Game4 {
 
         const lang = window.GeryApp?.modules?.language;
 
-        // Növeljük a húzások számát a kattintás pillanatában
+        // Először növeljük a húzások számát, majd frissítjük a kijelzést
         this.draws++;
 
-        // A számláló frissítése a valós aktuális értékre (1-től 5-ig)
         if (this.elements.draws) {
             this.elements.draws.textContent = `${this.draws}/${this.totalDraws} ${lang?.t('game_text_4') || 'húzás'}`;
         }
@@ -178,7 +174,6 @@ export class Game4 {
                     <div style="font-size:2.5rem;">${suit}</div>
                 </div>
             `;
-            // Animáció
             this.elements.cardDisplay.style.transform = 'scale(0.8)';
             setTimeout(() => {
                 this.elements.cardDisplay.style.transform = 'scale(1)';
@@ -190,7 +185,6 @@ export class Game4 {
             this.elements.score.textContent = this.score;
         }
 
-        // Gomb szövegének frissítése, ha ez volt az utolsó húzás
         if (this.draws >= this.totalDraws) {
             this.elements.drawBtn.textContent = `🎯 ${lang?.t('exit_confirm') || 'Vissza'}`;
         }
