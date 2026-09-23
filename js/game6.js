@@ -4,7 +4,7 @@
 
 export class game6 {
     constructor() {
-        this.gameId = 5;
+        this.gameId = 6;
         this.isRunning = false;
         this.score = 0;
         this.elements = {};
