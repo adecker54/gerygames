@@ -44,7 +44,7 @@ export class GamesManager {
                 image: 'assets/images/game5.jpg',
                 multiplier: 4,
                 description: 'Kő-papír-olló - győzd le Geryt!'
-            }
+            },
             { 
                 id: 6, 
                 name: 'game_name_6', 
