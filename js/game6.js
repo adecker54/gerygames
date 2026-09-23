@@ -49,7 +49,7 @@ export class game6 {
                     <div class="game-multiplier-display">
                         ${lang?.t('multiplier_label') || 'Szorzó:'} <span>×${this.multiplier}</span>
                     </div>
-                    <button class="game-exit-btn" style="background:transparent;border:none;font-size:1.5rem;cursor:pointer;color:#c0392b;">
+                    <button class="" style="background:transparent;border:none;font-size:1.5rem;cursor:pointer;color:#c0392b;">
                         ⬆
                     </button>
                 </div>
@@ -128,7 +128,7 @@ export class game6 {
             status: document.getElementById('game6-status'),
             drawBtn: document.getElementById('game6-draw-btn'),
             finishBtn: document.getElementById('game6-finish-btn'),
-            exitBtn: container.querySelector('.game-exit-btn'),
+            exitBtn: container.querySelector('game6-exit-btn'),
             boardWrap: document.getElementById('game6-board-wrap')
         };
 
