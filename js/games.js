@@ -62,7 +62,7 @@ export class GamesManager {
             window.GeryApp.state.gameMultipliers = this.games.map(g => g.multiplier);
             
             // Biztosítjuk, hogy a gameScores tömb is 6 elemű legyen, ha még nem az
-            if (!window.GeryApp.state.gameScores || window.GeryApp.state.gameScores.length < 5) {
+            if (!window.GeryApp.state.gameScores || window.GeryApp.state.gameScores.length < 6) {
                 window.GeryApp.state.gameScores = [0, 0, 0, 0, 0, 0];
             }
         }
