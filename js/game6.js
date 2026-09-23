@@ -2,7 +2,7 @@
 // GAME6.JS - Kígyó (klasszikus)
 // ================================================================
 
-export class game6 {
+export class Game6 {
     constructor() {
         this.gameId = 6;
         this.isRunning = false;
@@ -128,7 +128,7 @@ export class game6 {
             status: document.getElementById('game6-status'),
             drawBtn: document.getElementById('game6-draw-btn'),
             finishBtn: document.getElementById('game6-finish-btn'),
-            exitBtn: container.querySelector('game6-exit-btn'),
+            exitBtn: container.querySelector('.game-exit-btn'),
             boardWrap: document.getElementById('game6-board-wrap')
         };
 
