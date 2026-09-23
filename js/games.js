@@ -1,5 +1,5 @@
 // ================================================================
-// GAMES.JS - Játékmenü kezelés (5 játékkal: Kő-papír-olló hozzáadva)
+// GAMES.JS - Játékmenü kezelés (6 játékkal)
 // ================================================================
 
 export class GamesManager {
@@ -45,6 +45,13 @@ export class GamesManager {
                 multiplier: 4,
                 description: 'Kő-papír-olló - győzd le Geryt!'
             }
+            { 
+                id: 6, 
+                name: 'game_name_6', 
+                image: 'assets/images/game6.jpg',
+                multiplier: 1,
+                description: 'Klasszikus kígyó'
+            }
         ];
 
         if (window.GeryApp) {
@@ -54,14 +61,14 @@ export class GamesManager {
             }));
             window.GeryApp.state.gameMultipliers = this.games.map(g => g.multiplier);
             
-            // Biztosítjuk, hogy a gameScores tömb is 5 elemű legyen, ha még nem az
+            // Biztosítjuk, hogy a gameScores tömb is 6 elemű legyen, ha még nem az
             if (!window.GeryApp.state.gameScores || window.GeryApp.state.gameScores.length < 5) {
-                window.GeryApp.state.gameScores = [0, 0, 0, 0, 0];
+                window.GeryApp.state.gameScores = [0, 0, 0, 0, 0, 0];
             }
         }
 
         this.initialized = true;
-        console.log('🎮 Játékmenü inicializálva (5 játékkal)');
+        console.log('🎮 Játékmenü inicializálva (6 játékkal)');
         return true;
     }
 
@@ -173,7 +180,7 @@ export class GamesManager {
         const finalPoints = points * multiplier;
 
         if (!state.gameScores) {
-            state.gameScores = [0, 0, 0, 0, 0];
+            state.gameScores = [0, 0, 0, 0, 0, 0];
         }
 
         state.gameScores[gameId - 1] = finalPoints;
@@ -195,7 +202,7 @@ export class GamesManager {
     resetGames() {
         const state = window.GeryApp?.state;
         if (state) {
-            state.gameScores = [0, 0, 0, 0, 0];
+            state.gameScores = [0, 0, 0, 0, 0, 0];
             state.sessionPoints = 0;
         }
         this.renderMenu();
