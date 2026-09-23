@@ -241,6 +241,7 @@
         import { Game3 } from './js/game3.js';
         import { Game4 } from './js/game4.js';
         import { Game5 } from './js/game5.js';
+        import { Game6 } from './js/game6.js';
         import { AdminManager } from './js/admin.js';
 
         // ---- Globális állapot ----
@@ -255,14 +256,15 @@
                 isCodeValid: false,
                 isLoggedIn: false,
                 walletAddress: null,
-                gameScores: [0, 0, 0, 0, 0],   // Az egyes játékokban elért pontok
-                gameMultipliers: [0, 0, 0, 0, 0], // Az egyes játékok szorzói
+                gameScores: [0, 0, 0, 0, 0, 0],   // Az egyes játékokban elért pontok
+                gameMultipliers: [0, 0, 0, 0, 0, 0], // Az egyes játékok szorzói
                 games: [
                     { id: 1, name: 'Játék 1', image: 'game1.jpg', multiplier: 1, active: false },
                     { id: 2, name: 'Játék 2', image: 'game2.jpg', multiplier: 1, active: false },
                     { id: 3, name: 'Játék 3', image: 'game3.jpg', multiplier: 1, active: false },
                     { id: 4, name: 'Játék 4', image: 'game4.jpg', multiplier: 1, active: false },
                     { id: 5, name: 'Játék 5', image: 'game5.jpg', multiplier: 1, active: false }                ],
+                    { id: 6, name: 'Játék 6', image: 'game6.jpg', multiplier: 1, active: false }                ],
                 codeList: [],               // Az összes érvényes kód
                 pointsData: [],             // A points.csv tartalma
                 isAdmin: false              // Admin mód aktív?
@@ -299,6 +301,7 @@
             window.GeryApp.modules.game3 = new Game3();
             window.GeryApp.modules.game4 = new Game4();
             window.GeryApp.modules.game5 = new Game5();
+            window.GeryApp.modules.game6 = new Game6();
 
             // Admin
             window.GeryApp.modules.admin = new AdminManager();
