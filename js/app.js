@@ -53,6 +53,10 @@ export class App {
         this.modules.language.onChange(() => {
             this.updateScreenTexts();
             this.modules.language.applyToDOM();
+            // HA a főmenüben vagyunk, frissítjük a játékok kártyáit is az új nyelvre
+            if (this.currentScreen === 'menu') {
+                this.modules.games.renderMenu();
+            }
         });
 
         // Betöltés után megjelenítés
