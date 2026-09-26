@@ -37,7 +37,7 @@ export class Game6 {
         if (!container) return;
 
         const lang = window.GeryApp?.modules?.language;
-        const gameName = lang?.t('game_name_6') || 'Kígyó';
+        const gameName = lang?.t('game_name_6') || 'Klasszikus kígyó';
 
         const canvasW = this.cols * this.cell;
         const canvasH = this.rows * this.cell;
@@ -49,7 +49,7 @@ export class Game6 {
                     <div class="game-multiplier-display">
                         ${lang?.t('multiplier_label') || 'Szorzó:'} <span>×${this.multiplier}</span>
                     </div>
-                    <button class="" style="background:transparent;border:none;font-size:1.5rem;cursor:pointer;color:#c0392b;">
+                    <button class="game-exit-btn" style="background:transparent;border:none;font-size:1.5rem;cursor:pointer;color:#c0392b;">
                         ⬆
                     </button>
                 </div>
@@ -364,7 +364,7 @@ export class Game6 {
             if (app) app.showScreen('menu');
         }
 
-        console.log(`🏁 Játék 5 befejezve: ${this.score} pont`);
+        console.log(`🏁 Játék 6 befejezve: ${this.score} pont`);
     }
 
     reset() {

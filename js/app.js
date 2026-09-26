@@ -91,7 +91,7 @@ export class App {
         // Képernyő specifikus inicializálás
         if (screenName === 'intro') {
             this.state.sessionPoints = 0;
-            this.state.gameScores = [0, 0, 0, 0, 0];
+            this.state.gameScores = [0, 0, 0, 0, 0, 0];
             this.state.isCodeValid = false;
             this.state.userCode = null;
             
@@ -415,7 +415,7 @@ export class App {
             this.state.userCode = code;
             this.state.isCodeValid = true;
             this.state.sessionPoints = 0;
-            this.state.gameScores = [0, 0, 0, 0, 0];
+            this.state.gameScores = [0, 0, 0, 0, 0, 0];
         
             input.classList.remove('error');
             errorMsg.textContent = '';
